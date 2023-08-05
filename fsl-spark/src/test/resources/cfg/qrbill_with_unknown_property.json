@@ -1,0 +1,17 @@
+{
+	"gaga":
+	{
+		"path":"resources/invoice.pdf"
+	},
+	"target":
+	{
+		"path":"resources/Rechnung.pdf"
+	},
+	"creditor":
+	{
+		"name":"Kreditorname",
+		"address":"Kreditoradresse",
+		"city":"9000 Kreditorstadt",
+		"country":"CH"
+	}
+}

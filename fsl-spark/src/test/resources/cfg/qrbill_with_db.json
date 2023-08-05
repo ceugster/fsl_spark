@@ -1,0 +1,21 @@
+{
+	"database":
+	{
+		"password":"ce_eu97",
+		"url":"jdbc:filemaker://localhost/Test",
+		"username":"christian"
+	},
+	"source":
+	{
+		"container_col":"invoice",
+		"table":"QRBill",
+		"where_col":"id_text"
+	},
+	"target":
+	{
+		"container_col":"qrbill",
+		"name_col":"name",
+		"table":"QRBill",
+		"where_col":"id_text"
+	}
+}

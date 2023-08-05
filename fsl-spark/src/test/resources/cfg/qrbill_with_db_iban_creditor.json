@@ -1,0 +1,29 @@
+{
+	"iban": "CH4431999123000889012",
+	"database":
+	{
+		"url":"jdbc:filemaker://localhost/Test",
+		"username":"christian",
+		"password":"ce_eu97"
+	},
+	"source":
+	{
+		"table":"QRBill",
+		"container_col":"invoice",
+		"where_col":"id_text"
+	},
+	"target":
+	{
+		"table":"QRBill",
+		"container_col":"qrbill",
+		"name_col":"name",
+		"where_col":"id_text"
+	},
+	"creditor":
+	{
+		"name":"Kreditorname",
+		"address":"Kreditoradresse",
+		"city":"9000 Kreditorstadt",
+		"country":"CH"
+	}
+}

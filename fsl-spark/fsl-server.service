@@ -1,0 +1,13 @@
+[Unit]
+Description=fsl-server
+After=network.target
+
+[Service]
+ExecStart=/opt/Fsl/Fsl.sh
+ExecReload=/opt/Fsl/Fsl.sh graceful
+Type=notify
+Restart=always
+
+
+[Install]
+WantedBy=default.target

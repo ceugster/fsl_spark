@@ -1,0 +1,12 @@
+{
+	"iban": "CH4431999123000889012",
+	"reference":"00000000000000000000000000",
+	"currency":"CHF",
+	"creditor":
+	{
+		"name":"Kreditorname",
+		"address":"Kreditoradresse",
+		"city":"9000 Kreditorstadt",
+		"country":"AT"
+	}
+}

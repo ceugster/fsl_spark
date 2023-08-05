@@ -1,0 +1,481 @@
+{
+  "bkToCstmrDbtCdtNtfctn": {
+    "grpHdr": {
+      "msgId": "20221216375204007304861",
+      "creDtTm": {
+        "dateTime": {
+          "date": {
+            "year": 2022,
+            "month": 12,
+            "day": 16
+          },
+          "time": {
+            "hour": 23,
+            "minute": 39,
+            "second": 55,
+            "nano": 0
+          }
+        },
+        "offset": {
+          "totalSeconds": 3600
+        }
+      },
+      "msgPgntn": {
+        "pgNb": "1",
+        "lastPgInd": true
+      },
+      "addtlInf": "SPS/1.7/PROD"
+    },
+    "ntfctn": [
+      {
+        "id": "20221216375204007304863",
+        "creDtTm": {
+          "dateTime": {
+            "date": {
+              "year": 2022,
+              "month": 12,
+              "day": 16
+            },
+            "time": {
+              "hour": 23,
+              "minute": 39,
+              "second": 55,
+              "nano": 0
+            }
+          },
+          "offset": {
+            "totalSeconds": 3600
+          }
+        },
+        "frToDt": {
+          "frDtTm": {
+            "dateTime": {
+              "date": {
+                "year": 2022,
+                "month": 12,
+                "day": 10
+              },
+              "time": {
+                "hour": 0,
+                "minute": 0,
+                "second": 0,
+                "nano": 0
+              }
+            },
+            "offset": {
+              "totalSeconds": 3600
+            }
+          },
+          "toDtTm": {
+            "dateTime": {
+              "date": {
+                "year": 2022,
+                "month": 12,
+                "day": 16
+              },
+              "time": {
+                "hour": 23,
+                "minute": 59,
+                "second": 59,
+                "nano": 0
+              }
+            },
+            "offset": {
+              "totalSeconds": 3600
+            }
+          }
+        },
+        "rptgSrc": {
+          "prtry": "OTHR"
+        },
+        "acct": {
+          "id": {
+            "iban": "CH0809000000450010065"
+          },
+          "ownr": {
+            "nm": "Pfluger Christoph August Der Zeitpunkt Solothurn"
+          }
+        },
+        "ntry": [
+          {
+            "ntryRef": "CH5630000001450010065",
+            "amt": {
+              "value": 50.00,
+              "ccy": "CHF"
+            },
+            "cdtDbtInd": "CRDT",
+            "rvslInd": false,
+            "sts": "BOOK",
+            "bookgDt": {
+              "dt": {
+                "year": 2022,
+                "month": 12,
+                "day": 16
+              }
+            },
+            "valDt": {
+              "dt": {
+                "year": 2022,
+                "month": 12,
+                "day": 16
+              }
+            },
+            "acctSvcrRef": "350220009M2I8XBU",
+            "bkTxCd": {
+              "domn": {
+                "cd": "PMNT",
+                "fmly": {
+                  "cd": "RCDT",
+                  "subFmlyCd": "VCOM"
+                }
+              }
+            },
+            "ntryDtls": [
+              {
+                "btch": {
+                  "nbOfTxs": "3"
+                },
+                "txDtls": [
+                  {
+                    "refs": {
+                      "acctSvcrRef": "221215CH09LS26M5",
+                      "instrId": "20221215000800994396358",
+                      "prtry": [
+                        {
+                          "tp": "00",
+                          "ref": "20221216375204708963137"
+                        }
+                      ]
+                    },
+                    "amt": {
+                      "value": 20.00,
+                      "ccy": "CHF"
+                    },
+                    "cdtDbtInd": "CRDT",
+                    "bkTxCd": {
+                      "domn": {
+                        "cd": "PMNT",
+                        "fmly": {
+                          "cd": "RCDT",
+                          "subFmlyCd": "AUTT"
+                        }
+                      }
+                    },
+                    "rltdPties": {
+                      "dbtr": {
+                        "nm": "Pfluger, Christoph August",
+                        "pstlAdr": {
+                          "strtNm": "Werkhofstrasse",
+                          "bldgNb": "19",
+                          "pstCd": "4500",
+                          "twnNm": "Solothurn",
+                          "ctry": "CH"
+                        }
+                      },
+                      "dbtrAcct": {
+                        "id": {
+                          "iban": "CH9209000000407516054"
+                        }
+                      },
+                      "ultmtDbtr": {
+                        "nm": "Linda Biedermann",
+                        "pstlAdr": {
+                          "strtNm": "Florastr. 16",
+                          "pstCd": "4500",
+                          "twnNm": "Solothurn",
+                          "ctry": "CH"
+                        }
+                      },
+                      "cdtrAcct": {
+                        "id": {
+                          "iban": "CH5630000001450010065"
+                        }
+                      }
+                    },
+                    "rltdAgts": {
+                      "dbtrAgt": {
+                        "finInstnId": {
+                          "bicfi": "POFICHBEXXX",
+                          "nm": "POSTFINANCE AG",
+                          "pstlAdr": {
+                            "adrLine": [
+                              "MINGERSTRASSE 20",
+                              "3030 BERN"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "rmtInf": {
+                      "strd": [
+                        {
+                          "cdtrRefInf": {
+                            "tp": {
+                              "cdOrPrtry": {
+                                "prtry": "QRR"
+                              }
+                            },
+                            "ref": "000000372142141220226485603"
+                          },
+                          "addtlRmtInf": [
+                            "?REJECT?0",
+                            "?ERROR?000",
+                            "Rechnung Nr. 372142"
+                          ]
+                        }
+                      ]
+                    },
+                    "rltdDts": {
+                      "accptncDtTm": {
+                        "dateTime": {
+                          "date": {
+                            "year": 2022,
+                            "month": 12,
+                            "day": 16
+                          },
+                          "time": {
+                            "hour": 20,
+                            "minute": 0,
+                            "second": 0,
+                            "nano": 0
+                          }
+                        },
+                        "offset": {
+                          "totalSeconds": 3600
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "refs": {
+                      "acctSvcrRef": "221215CH09LSZ5WQ",
+                      "instrId": "20221215000800994366463",
+                      "prtry": [
+                        {
+                          "tp": "00",
+                          "ref": "20221216375204708885249"
+                        }
+                      ]
+                    },
+                    "amt": {
+                      "value": 10.00,
+                      "ccy": "CHF"
+                    },
+                    "cdtDbtInd": "CRDT",
+                    "bkTxCd": {
+                      "domn": {
+                        "cd": "PMNT",
+                        "fmly": {
+                          "cd": "RCDT",
+                          "subFmlyCd": "AUTT"
+                        }
+                      }
+                    },
+                    "rltdPties": {
+                      "dbtr": {
+                        "nm": "Pfluger, Christoph August",
+                        "pstlAdr": {
+                          "strtNm": "Werkhofstrasse",
+                          "bldgNb": "19",
+                          "pstCd": "4500",
+                          "twnNm": "Solothurn",
+                          "ctry": "CH"
+                        }
+                      },
+                      "dbtrAcct": {
+                        "id": {
+                          "iban": "CH9209000000407516054"
+                        }
+                      },
+                      "ultmtDbtr": {
+                        "nm": "Christoph Pfluger",
+                        "pstlAdr": {
+                          "strtNm": "Werkhofstr. 19",
+                          "pstCd": "4500",
+                          "twnNm": "Solothurn",
+                          "ctry": "CH"
+                        }
+                      },
+                      "cdtrAcct": {
+                        "id": {
+                          "iban": "CH5630000001450010065"
+                        }
+                      }
+                    },
+                    "rltdAgts": {
+                      "dbtrAgt": {
+                        "finInstnId": {
+                          "bicfi": "POFICHBEXXX",
+                          "nm": "POSTFINANCE AG",
+                          "pstlAdr": {
+                            "adrLine": [
+                              "MINGERSTRASSE 20",
+                              "3030 BERN"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "rmtInf": {
+                      "strd": [
+                        {
+                          "cdtrRefInf": {
+                            "tp": {
+                              "cdOrPrtry": {
+                                "prtry": "QRR"
+                              }
+                            },
+                            "ref": "000000372144141220225496407"
+                          },
+                          "addtlRmtInf": [
+                            "?REJECT?0",
+                            "?ERROR?000",
+                            "Rechnung Nr. 372144"
+                          ]
+                        }
+                      ]
+                    },
+                    "rltdDts": {
+                      "accptncDtTm": {
+                        "dateTime": {
+                          "date": {
+                            "year": 2022,
+                            "month": 12,
+                            "day": 16
+                          },
+                          "time": {
+                            "hour": 20,
+                            "minute": 0,
+                            "second": 0,
+                            "nano": 0
+                          }
+                        },
+                        "offset": {
+                          "totalSeconds": 3600
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "refs": {
+                      "acctSvcrRef": "221215CH09LUCD83",
+                      "instrId": "20221215000800994414138",
+                      "prtry": [
+                        {
+                          "tp": "00",
+                          "ref": "20221216375204708914844"
+                        }
+                      ]
+                    },
+                    "amt": {
+                      "value": 20.00,
+                      "ccy": "CHF"
+                    },
+                    "cdtDbtInd": "CRDT",
+                    "bkTxCd": {
+                      "domn": {
+                        "cd": "PMNT",
+                        "fmly": {
+                          "cd": "RCDT",
+                          "subFmlyCd": "AUTT"
+                        }
+                      }
+                    },
+                    "rltdPties": {
+                      "dbtr": {
+                        "nm": "Pfluger, Christoph August",
+                        "pstlAdr": {
+                          "strtNm": "Werkhofstrasse",
+                          "bldgNb": "19",
+                          "pstCd": "4500",
+                          "twnNm": "Solothurn",
+                          "ctry": "CH"
+                        }
+                      },
+                      "dbtrAcct": {
+                        "id": {
+                          "iban": "CH9209000000407516054"
+                        }
+                      },
+                      "ultmtDbtr": {
+                        "nm": "Linda Biedermann",
+                        "pstlAdr": {
+                          "strtNm": "Spinngasse 6",
+                          "pstCd": "4552",
+                          "twnNm": "Derendingen",
+                          "ctry": "CH"
+                        }
+                      },
+                      "cdtrAcct": {
+                        "id": {
+                          "iban": "CH5630000001450010065"
+                        }
+                      }
+                    },
+                    "rltdAgts": {
+                      "dbtrAgt": {
+                        "finInstnId": {
+                          "bicfi": "POFICHBEXXX",
+                          "nm": "POSTFINANCE AG",
+                          "pstlAdr": {
+                            "adrLine": [
+                              "MINGERSTRASSE 20",
+                              "3030 BERN"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "rmtInf": {
+                      "strd": [
+                        {
+                          "cdtrRefInf": {
+                            "tp": {
+                              "cdOrPrtry": {
+                                "prtry": "QRR"
+                              }
+                            },
+                            "ref": "000000372143141220225247907"
+                          },
+                          "addtlRmtInf": [
+                            "?REJECT?0",
+                            "?ERROR?000",
+                            "Rechnung Nr. 372143"
+                          ]
+                        }
+                      ]
+                    },
+                    "rltdDts": {
+                      "accptncDtTm": {
+                        "dateTime": {
+                          "date": {
+                            "year": 2022,
+                            "month": 12,
+                            "day": 16
+                          },
+                          "time": {
+                            "hour": 20,
+                            "minute": 0,
+                            "second": 0,
+                            "nano": 0
+                          }
+                        },
+                        "offset": {
+                          "totalSeconds": 3600
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "addtlNtryInf": "SAMMELGUTSCHRIFT FÜR KONTO: CH5630000001450010065 VERARBEITUNG VOM 16.12.2022 PAKET ID: 221216CH000008UO"
+          }
+        ]
+      }
+    ]
+  },
+  "type": "MX",
+  "@xmlns": "urn:iso:std:iso:20022:tech:xsd:camt.054.001.04",
+  "identifier": "camt.054.001.04"
+}
