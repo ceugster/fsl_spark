@@ -136,9 +136,10 @@ public final class XlsTest extends AbstractXlsTest
 		
 		responseNode = mapper.readTree(response.getContentAsString());
 		assertEquals(Executor.OK, responseNode.get(Executor.STATUS).asText());
-		assertEquals(0, responseNode.get(Executor.RESULT).asInt());
+		assertEquals(0, responseNode.get(Key.INDEX.key()).asInt());
+		assertEquals("", responseNode.get(Key.SHEET.key()).asText());
 
-		Sheet sheet = Xls.activeWorkbook.createSheet();
+		Xls.activeWorkbook.createSheet();
 		
 		response = client.POST("http://localhost:4567/fsl/Xls.activeSheetPresent").
 				header("Content-Type", "application/json").
@@ -148,7 +149,8 @@ public final class XlsTest extends AbstractXlsTest
 		
 		responseNode = mapper.readTree(response.getContentAsString());
 		assertEquals(Executor.OK, responseNode.get(Executor.STATUS).asText());
-		assertEquals(1, responseNode.get(Executor.RESULT).asInt());
+		assertEquals(1, responseNode.get(Key.INDEX.key()).asInt());
+		assertEquals("Sheet0", responseNode.get(Key.SHEET.key()).asText());
 	}
 
 	@Test
@@ -494,8 +496,9 @@ public final class XlsTest extends AbstractXlsTest
 				send();
 		
 		JsonNode responseNode = mapper.readTree(response.getContentAsString());
-		assertEquals(Executor.OK, responseNode.get(Executor.STATUS).asText());
-		assertNull(responseNode.get(Executor.ERRORS));
+		assertEquals(Executor.ERROR, responseNode.get(Executor.STATUS).asText());
+		assertEquals(1, responseNode.get(Executor.ERRORS).size());
+		assertEquals("workbook missing (create workbook first)",responseNode.get(Executor.ERRORS).get(0).asText());
 
 		Xls.activeWorkbook = new XSSFWorkbook();
 		

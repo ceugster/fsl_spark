@@ -22,17 +22,17 @@ public class Pdf extends Executor
 {
 	private PDDocument document;
 	
-	public void getDocumentInfo(ObjectNode requestNode, ObjectNode responseNode)
+	public void getDocumentInfo()
 	{
 		String content = null;
-		JsonNode node = requestNode.findPath("content");
+		JsonNode node = getRequestNode().findPath("content");
 		if (node.isTextual())
 		{
 			content = node.asText();
 		}
 		else if (node.isMissingNode())
 		{
-			node = requestNode.findPath("file");
+			node = getRequestNode().findPath("file");
 			if (node.isTextual())
 			{
 				File file = new File(String.class.cast(node.asText()));
@@ -104,7 +104,7 @@ public class Pdf extends Executor
 					metadata.put("creationDate", Objects.nonNull(calendar) ? formatter.format(calendar.getTime()): "");
 					calendar= info.getModificationDate();
 					metadata.put("modificationDate", Objects.nonNull(calendar) ? formatter.format(calendar.getTime()): "");
-					responseNode.put(Executor.RESULT, metadata.toString());
+					getResponseNode().put(Executor.RESULT, metadata.toString());
 				}
 			}
 			catch (Exception e) 

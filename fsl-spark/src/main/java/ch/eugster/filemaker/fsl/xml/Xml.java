@@ -22,29 +22,19 @@ public class Xml extends Executor
 
 	public static final String IDENTIFIER_KEY = "identifier";
 	
-	public String convert(String request)
+	public void convert()
 	{
-		if (createRequestNode(request))
-		{
-			doConvert();
-		}
-		return getResponse();
-	}
-	
-	private boolean doConvert()
-	{
-		boolean result = true;
 		JsonNode xmlFileNode = getRequestNode().findPath(Key.XML_FILE.key());
 		if (xmlFileNode.isTextual())
 		{
 			File file = new File(xmlFileNode.asText());
 			if (file.isFile())
 			{
-				result = readXmlFileAndConvertToJson(file);
+				readXmlFileAndConvertToJson(file);
 			}
 			else
 			{
-				result = addErrorMessage("'" + file.getName()+ "' is not a valid xml file");
+				addErrorMessage("'" + file.getName()+ "' is not a valid xml file");
 			}
 		}
 		else if (xmlFileNode.isMissingNode())
@@ -55,11 +45,11 @@ public class Xml extends Executor
 				File file = new File(jsonFileNode.asText());
 				if (file.isFile())
 				{
-					result = readJsonFileAndConvertToXml(file);
+					readJsonFileAndConvertToXml(file);
 				}
 				else
 				{
-					result = addErrorMessage("'" + file.getName()+ "' is not a valid json file");
+					addErrorMessage("'" + file.getName()+ "' is not a valid json file");
 				}
 			}
 			else if (jsonFileNode.isMissingNode())
@@ -68,7 +58,7 @@ public class Xml extends Executor
 				if (xmlContentNode.isTextual())
 				{
 					String xml = xmlContentNode.asText();
-					result = convertXmlToJson(xml);
+					convertXmlToJson(xml);
 				}
 				else if (xmlContentNode.isMissingNode())
 				{
@@ -76,16 +66,15 @@ public class Xml extends Executor
 					if (jsonContentNode.isTextual())
 					{
 						String json = jsonContentNode.asText();
-						result = convertJsonToXml(json);
+						convertJsonToXml(json);
 					}
 					else if (jsonContentNode.isMissingNode())
 					{
-						result = addErrorMessage("missing argument, one of '" + Key.XML_FILE.key() + "', '" + Key.XML_CONTENT.key() + "', " + Key.JSON_FILE.key() + "', or '" + Key.JSON_CONTENT.key() + "'");
+						addErrorMessage("missing argument, one of '" + Key.XML_FILE.key() + "', '" + Key.XML_CONTENT.key() + "', " + Key.JSON_FILE.key() + "', or '" + Key.JSON_CONTENT.key() + "'");
 					}
 				}
 			}
 		}
-		return result;
 	}
 
 	private boolean readXmlFileAndConvertToJson(File file)

@@ -30,7 +30,7 @@ import spark.servlet.SparkApplication;
 
 public class Fsl implements SparkApplication
 {
-	public static String VERSION = "1.0.5";
+	public static String VERSION = "1.1.1";
 	
 	public static Map<String, Fsl> fsls = new HashMap<String, Fsl>();
 	

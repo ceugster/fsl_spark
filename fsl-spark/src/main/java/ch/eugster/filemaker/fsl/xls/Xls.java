@@ -62,14 +62,24 @@ import ch.eugster.filemaker.fsl.Executor;
  *
  * @created 2023-07-24
  * 
- * @updated 
+ * @updated
  * 
- * The public methods have to follow this convention:
+ *          The public methods have to follow this convention:
  * 
- * - There is always one parameter of type string. This string must be a valid json object, that is a conversion to a jackson object node must be successfully done. The json object can contain zero or more attributes of valid json types, depending on the method called (see method descriptions).
- * - There is always on return parameter of type string, This string too must be a valid json object as above. The json attribute 'status' is mandatory and contains either 'OK' or 'Fehler', depending on the result of the method. Occuring errors are documented in an array object named 'errors'. Depending on the method json attributes with information are returned. Valid attribute names are documented at the method.
+ *          - There is always one parameter of type string. This string must be
+ *          a valid json object, that is a conversion to a jackson object node
+ *          must be successfully done. The json object can contain zero or more
+ *          attributes of valid json types, depending on the method called (see
+ *          method descriptions). - There is always on return parameter of type
+ *          string, This string too must be a valid json object as above. The
+ *          json attribute 'status' is mandatory and contains either 'OK' or
+ *          'Fehler', depending on the result of the method. Occuring errors are
+ *          documented in an array object named 'errors'. Depending on the
+ *          method json attributes with information are returned. Valid
+ *          attribute names are documented at the method.
  * 
- * There is a set of controlled attributes, that are recognized valid. @see ch.eugster.filemaker.fsl.xls.Key
+ *          There is a set of controlled attributes, that are recognized
+ *          valid. @see ch.eugster.filemaker.fsl.xls.Key
  */
 public class Xls extends Executor
 {
@@ -84,35 +94,12 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String activateSheet(String request)
+	public void activateSheet()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doActivateSheet();
-			}
+			doActivateSheet();
 		}
-		return getResponse();
-	}
-	
-	/**
-	 * Return active sheet name and index
-	 * 
-	 * @return status 'OK' or 'Fehler'
-	 * @return optional 'errors' array of error messages
-	 * 
-	 */
-	public String activeSheet(String request)
-	{
-		if (createRequestNode(request))
-		{
-			if (workbookPresent())
-			{
-				doGetActiveSheet();
-			}
-		}
-		return getResponse();
 	}
 
 	/**
@@ -122,66 +109,61 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String activeSheetPresent(String request)
+	public void activeSheet()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doActiveSheetPresent();
-			}
+			doGetActiveSheet();
 		}
-		return getResponse();
 	}
-	
-	public String applyCellStyles(String request)
+
+	/**
+	 * Return active sheet name and index
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public void activeSheetPresent()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doApplyCellStyles();
-			}
+			doActiveSheetPresent();
 		}
-		return getResponse();
 	}
-	
-	public String applyFontStyles(String request)
+
+	public void applyCellStyles()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doApplyFontStyles();
-			}
+			doApplyCellStyles();
 		}
-		return getResponse();
 	}
-	
-	public String autoSizeColumns(String request)
+
+	public void applyFontStyles()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doAutoSizeColumns();
-			}
+			doApplyFontStyles();
 		}
-		return getResponse();
 	}
-	
-	public String copyCells(String request)
+
+	public void autoSizeColumns()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doCopyCells();
-			}
+			doAutoSizeColumns();
 		}
-		return getResponse();
 	}
-	
+
+	public void copyCells()
+	{
+		if (isWorkbookPresent())
+		{
+			doCopyCells();
+		}
+	}
+
 	/**
 	 * Create sheet
 	 * 
@@ -191,18 +173,14 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String createSheet(String request)
+	public void createSheet()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doCreateSheet();
-			}
+			doCreateSheet();
 		}
-		return getResponse();
 	}
-	
+
 	/**
 	 * Creates a workbook
 	 * 
@@ -212,15 +190,11 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String createWorkbook(String request)
+	public void createWorkbook()
 	{
-		if (createRequestNode(request))
-		{
-			doCreateWorkbook();
-		}
-		return getResponse();
+		doCreateWorkbook();
 	}
-	
+
 	/**
 	 * Create a workbook with initial sheet
 	 * 
@@ -230,18 +204,14 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String createWorkbookWithSheet(String request)
+	public void createWorkbookWithSheet()
 	{
-		if (createRequestNode(request))
+		if (doCreateWorkbook())
 		{
-			if (doCreateWorkbook())
-			{
-				doCreateSheet();
-			}
+			doCreateSheet();
 		}
-		return getResponse();
 	}
-	
+
 	/**
 	 * Drop sheet
 	 * 
@@ -251,29 +221,25 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String dropSheet(String request)
+	public void dropSheet()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doDropSheet();
-			}
+			doDropSheet();
 		}
-		return getResponse();
 	}
-	
+
 	/**
 	 * Returns an string array of all callable methods
 	 * 
-	 * @param getRequestNode()  empty
+	 * @param getRequestNode() empty
 	 * 
 	 * @return status 'OK' or 'Fehler'
 	 * @return methods string array of method names
 	 * @return optional errors containing error messages
 	 * 
 	 */
-	public String getCallableMethods(String request)
+	public void getCallableMethods()
 	{
 		ArrayNode callableMethods = getResponseNode().arrayNode();
 		Method[] methods = Xls.class.getDeclaredMethods();
@@ -289,10 +255,9 @@ public class Xls extends Executor
 			}
 		}
 		getResponseNode().set(Executor.RESULT, callableMethods);
-		return getResponse();
 	}
-	
-	public String getSupportedFunctionNames(String request)
+
+	public void getSupportedFunctionNames()
 	{
 		ArrayNode arrayNode = getResponseNode().arrayNode();
 		Collection<String> supportedFunctionNames = FunctionEval.getSupportedFunctionNames();
@@ -301,7 +266,6 @@ public class Xls extends Executor
 			arrayNode.add(supportedFunctionName);
 		}
 		getResponseNode().set(Executor.RESULT, arrayNode);
-		return getResponse();
 	}
 
 	/**
@@ -314,18 +278,14 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String moveSheet(String request)
+	public void moveSheet()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doMoveSheet();
-			}
+			doMoveSheet();
 		}
-		return getResponse();
 	}
-	
+
 	/**
 	 * Release current workbook
 	 * 
@@ -333,16 +293,12 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String releaseWorkbook(String request)
+	public void releaseWorkbook()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doReleaseWorkbook();
-			}
+			doReleaseWorkbook();
 		}
-		return getResponse();
 	}
 
 	/**
@@ -355,30 +311,22 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String renameSheet(String request)
+	public void renameSheet()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doRenameSheet();
-			}
+			doRenameSheet();
 		}
-		return getResponse();
 	}
 
-	public String rotateCells(String request)
+	public void rotateCells()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doRotateCells();
-			}
+			doRotateCells();
 		}
-		return getResponse();
 	}
-	
+
 	/**
 	 * Save and release current workbook
 	 * 
@@ -388,21 +336,17 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String saveAndReleaseWorkbook(String request)
+	public void saveAndReleaseWorkbook()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
+			if (doSaveWorkbook())
 			{
-				if (doSaveWorkbook())
-				{
-					doReleaseWorkbook();
-				}
+				doReleaseWorkbook();
 			}
 		}
-		return getResponse();
 	}
-	
+
 	/**
 	 * Save current workbook
 	 * 
@@ -412,64 +356,44 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String saveWorkbook(String request)
+	public void saveWorkbook()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doSaveWorkbook();
-			}
+			doSaveWorkbook();
 		}
-		return getResponse();
 	}
 
-	public String setCells(String request)
+	public void setCells()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doSetCells();
-			}
+			doSetCells();
 		}
-		return getResponse();
-	}
-	
-	public String setFooters(String request)
-	{
-		if (createRequestNode(request))
-		{
-			if (workbookPresent())
-			{
-				doSetFooters();
-			}
-		}
-		return getResponse();
 	}
 
-	public String setHeaders(String request)
+	public void setFooters()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doSetHeaders();
-			}
+			doSetFooters();
 		}
-		return getResponse();
 	}
-	
-	public String setPrintSetup(String request)
+
+	public void setHeaders()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doSetPrintSetup();
-			}
+			doSetHeaders();
 		}
-		return getResponse();
+	}
+
+	public void setPrintSetup()
+	{
+		if (isWorkbookPresent())
+		{
+			doSetPrintSetup();
+		}
 	}
 
 	/**
@@ -479,27 +403,19 @@ public class Xls extends Executor
 	 * @return optional 'errors' array of error messages
 	 * 
 	 */
-	public String sheetNames(String request)
+	public void sheetNames()
 	{
-		if (createRequestNode(request))
+		if (isWorkbookPresent())
 		{
-			if (workbookPresent())
-			{
-				doGetSheetNames();
-			}
+			doGetSheetNames();
 		}
-		return getResponse();
 	}
-	
-	public String workbookPresent(String request)
+
+	public void workbookPresent()
 	{
-		if (createRequestNode(request))
-		{
-			getResponseNode().put(Executor.RESULT, Objects.nonNull(Xls.activeWorkbook) ? 1 : 0);
-		}
-		return getResponse();
+		getResponseNode().put(Executor.RESULT, Objects.nonNull(Xls.activeWorkbook) ? 1 : 0);
 	}
-	
+
 	private void copyCell(Cell sourceCell, Cell targetCell)
 	{
 		CellType cellType = sourceCell.getCellType();
@@ -536,7 +452,7 @@ public class Xls extends Executor
 		for (int i = 0; i < ptgs.length; i++)
 		{
 			if (ptgs[i] instanceof RefPtgBase)
-			{ 
+			{
 				// base class for cell references
 				RefPtgBase ref = (RefPtgBase) ptgs[i];
 				if (ref.isRowRelative())
@@ -549,7 +465,7 @@ public class Xls extends Executor
 				}
 			}
 			else if (ptgs[i] instanceof AreaPtgBase)
-			{ 
+			{
 				// base class for range references
 				AreaPtgBase ref = (AreaPtgBase) ptgs[i];
 				if (ref.isFirstColRelative())
@@ -574,7 +490,7 @@ public class Xls extends Executor
 		formula = FormulaRenderer.toFormulaString(getFormulaRenderingWorkbook(sheet), ptgs);
 		return formula;
 	}
-	
+
 	private boolean doActivateSheet()
 	{
 		boolean result = true;
@@ -608,7 +524,8 @@ public class Xls extends Executor
 				}
 				else
 				{
-					result = addErrorMessage("sheet with " + Key.INDEX.key() + " " + indexNode.asInt() + " does not exist");
+					result = addErrorMessage(
+							"sheet with " + Key.INDEX.key() + " " + indexNode.asInt() + " does not exist");
 				}
 			}
 			else if (indexNode.isMissingNode())
@@ -627,11 +544,12 @@ public class Xls extends Executor
 		if (result)
 		{
 			getResponseNode().put(Key.INDEX.key(), activeWorkbook.getActiveSheetIndex());
-			getResponseNode().put(Key.SHEET.key(), activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex()).getSheetName());
+			getResponseNode().put(Key.SHEET.key(),
+					activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex()).getSheetName());
 		}
 		return result;
 	}
-	
+
 	private boolean doActiveSheetPresent()
 	{
 		boolean result = true;
@@ -650,7 +568,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doApplyCellStyles()
 	{
 		boolean result = true;
@@ -662,7 +580,8 @@ public class Xls extends Executor
 			if (!cellNode.isMissingNode())
 			{
 				CellAddress cellAddress = getCellAddress(cellNode);
-				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getColumn());
+				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(),
+						cellAddress.getColumn(), cellAddress.getColumn());
 			}
 			else
 			{
@@ -711,7 +630,8 @@ public class Xls extends Executor
 			if (!cellNode.isMissingNode())
 			{
 				CellAddress cellAddress = getCellAddress(cellNode);
-				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getColumn());
+				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(),
+						cellAddress.getColumn(), cellAddress.getColumn());
 			}
 			else
 			{
@@ -777,7 +697,8 @@ public class Xls extends Executor
 			else
 			{
 				CellAddress cellAddress = getCellAddress(cellNode);
-				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getRow(), cellAddress.getColumn());
+				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getColumn(),
+						cellAddress.getRow(), cellAddress.getColumn());
 			}
 			if (Objects.nonNull(cellRangeAddress))
 			{
@@ -791,7 +712,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doCopyCells()
 	{
 		boolean result = true;
@@ -957,7 +878,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doCreateSheet()
 	{
 		boolean result = true;
@@ -1047,7 +968,8 @@ public class Xls extends Executor
 				}
 				else
 				{
-					result = addErrorMessage("sheet with " + Key.INDEX.key() + " " + indexNode.asInt() + " does not exist");
+					result = addErrorMessage(
+							"sheet with " + Key.INDEX.key() + " " + indexNode.asInt() + " does not exist");
 				}
 			}
 			else if (indexNode.isMissingNode())
@@ -1067,7 +989,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doGetActiveSheet()
 	{
 		boolean result = true;
@@ -1126,9 +1048,10 @@ public class Xls extends Executor
 				{
 					if (targetNode.asInt() < 0)
 					{
-						result = addErrorMessage("illegal argument '" + Key.TARGET.key() + "' (sheet index is out of range: " + targetNode.asInt() + ")");
+						result = addErrorMessage("illegal argument '" + Key.TARGET.key()
+								+ "' (sheet index is out of range: " + targetNode.asInt() + ")");
 					}
-						
+
 					if (activeWorkbook.getActiveSheetIndex() != targetNode.asInt())
 					{
 						activeWorkbook.setSheetOrder(sheet.getSheetName(), targetNode.asInt());
@@ -1136,7 +1059,9 @@ public class Xls extends Executor
 				}
 				else
 				{
-					result = addErrorMessage("illegal argument '" + Key.TARGET.key() + "' (sheet index is out of range: " + targetNode.asInt() + " > " + activeWorkbook.getNumberOfSheets() + ")");
+					result = addErrorMessage(
+							"illegal argument '" + Key.TARGET.key() + "' (sheet index is out of range: "
+									+ targetNode.asInt() + " > " + activeWorkbook.getNumberOfSheets() + ")");
 				}
 			}
 			else if (targetNode.isMissingNode())
@@ -1152,7 +1077,7 @@ public class Xls extends Executor
 		activeWorkbook = null;
 		return true;
 	}
-	
+
 	private boolean doRenameSheet()
 	{
 		boolean result = true;
@@ -1184,7 +1109,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doRotateCells()
 	{
 		boolean result = true;
@@ -1196,14 +1121,15 @@ public class Xls extends Executor
 			if (!cellNode.isMissingNode())
 			{
 				CellAddress cellAddress = getCellAddress(cellNode);
-				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getColumn());
+				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(),
+						cellAddress.getColumn(), cellAddress.getColumn());
 			}
 			else
 			{
 				JsonNode rangeNode = getRequestNode().findPath(Key.RANGE.key());
 				cellRangeAddress = getCellRangeAddress(rangeNode);
 			}
-			if (Objects.nonNull(cellRangeAddress)) 
+			if (Objects.nonNull(cellRangeAddress))
 			{
 				int rotation = Integer.MIN_VALUE;
 				JsonNode rotationNode = getRequestNode().findPath(Key.ROTATION.key());
@@ -1242,7 +1168,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doSaveWorkbook()
 	{
 		boolean result = true;
@@ -1487,7 +1413,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doSetCells(Sheet sheet, ObjectNode cellNode, ArrayNode valuesNode, Direction direction)
 	{
 		boolean result = true;
@@ -1502,7 +1428,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doSetCells(Sheet sheet, TextNode cellNode, ArrayNode valuesNode, Direction direction)
 	{
 		boolean result = true;
@@ -1517,7 +1443,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doSetFooters()
 	{
 		boolean result = true;
@@ -1545,7 +1471,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doSetHeaders()
 	{
 		boolean result = true;
@@ -1573,7 +1499,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
+
 	private boolean doSetPrintSetup()
 	{
 		boolean result = true;
@@ -1730,7 +1656,8 @@ public class Xls extends Executor
 				}
 				if (Objects.nonNull(topLeftAddress) && Objects.nonNull(bottomRightAddress))
 				{
-					cellRangeAddress = new CellRangeAddress(topLeftAddress.getRow(), bottomRightAddress.getRow(), topLeftAddress.getColumn(), bottomRightAddress.getColumn());
+					cellRangeAddress = new CellRangeAddress(topLeftAddress.getRow(), bottomRightAddress.getRow(),
+							topLeftAddress.getColumn(), bottomRightAddress.getColumn());
 				}
 			}
 			else if (rangeNode.isObject())
@@ -1741,7 +1668,8 @@ public class Xls extends Executor
 					bottomRightAddress = getCellAddress(rangeNode.findPath(Key.BOTTOM_RIGHT.key()));
 					if (Objects.nonNull(bottomRightAddress))
 					{
-						cellRangeAddress = new CellRangeAddress(topLeftAddress.getRow(), bottomRightAddress.getRow(), topLeftAddress.getColumn(), bottomRightAddress.getColumn());
+						cellRangeAddress = new CellRangeAddress(topLeftAddress.getRow(), bottomRightAddress.getRow(),
+								topLeftAddress.getColumn(), bottomRightAddress.getColumn());
 					}
 					else
 					{
@@ -1784,10 +1712,13 @@ public class Xls extends Executor
 										bottomRightAddress = new CellAddress(bottomNode.asInt(), rightNode.asInt());
 										if (Objects.isNull(bottomRightAddress))
 										{
-											bottomRightAddress = getCellAddress(rangeNode.findPath(Key.BOTTOM_RIGHT.key()));
+											bottomRightAddress = getCellAddress(
+													rangeNode.findPath(Key.BOTTOM_RIGHT.key()));
 											if (Objects.nonNull(bottomRightAddress))
 											{
-												cellRangeAddress = new CellRangeAddress(topLeftAddress.getRow(), bottomRightAddress.getRow(), topLeftAddress.getColumn(), bottomRightAddress.getColumn());
+												cellRangeAddress = new CellRangeAddress(topLeftAddress.getRow(),
+														bottomRightAddress.getRow(), topLeftAddress.getColumn(),
+														bottomRightAddress.getColumn());
 											}
 											else
 											{
@@ -1796,7 +1727,9 @@ public class Xls extends Executor
 										}
 										else
 										{
-											cellRangeAddress = new CellRangeAddress(topLeftAddress.getRow(), bottomRightAddress.getRow(), topLeftAddress.getColumn(), bottomRightAddress.getColumn());
+											cellRangeAddress = new CellRangeAddress(topLeftAddress.getRow(),
+													bottomRightAddress.getRow(), topLeftAddress.getColumn(),
+													bottomRightAddress.getColumn());
 										}
 									}
 									else
@@ -1914,7 +1847,7 @@ public class Xls extends Executor
 		}
 		return workbookWrapper;
 	}
-	
+
 	private Cell getOrCreateCell(Row row, int colIndex)
 	{
 		Cell cell = null;
@@ -1930,7 +1863,8 @@ public class Xls extends Executor
 			}
 			else
 			{
-				addErrorMessage("illegal cell index (" + colIndex + " > " + activeWorkbook.getSpreadsheetVersion().getLastColumnIndex() + ")");
+				addErrorMessage("illegal cell index (" + colIndex + " > "
+						+ activeWorkbook.getSpreadsheetVersion().getLastColumnIndex() + ")");
 			}
 		}
 		return cell;
@@ -1963,7 +1897,8 @@ public class Xls extends Executor
 		}
 		else
 		{
-			addErrorMessage("illegal row index (" + rowIndex + " > " + sheet.getWorkbook().getSpreadsheetVersion().getLastRowIndex() + ")");
+			addErrorMessage("illegal row index (" + rowIndex + " > "
+					+ sheet.getWorkbook().getSpreadsheetVersion().getLastRowIndex() + ")");
 		}
 		return row;
 	}
@@ -2011,7 +1946,7 @@ public class Xls extends Executor
 		}
 		return sheet;
 	}
-	
+
 	private boolean setCells(Sheet sheet, ArrayNode cellNode, ArrayNode valuesNode)
 	{
 		boolean result = true;
@@ -2036,18 +1971,18 @@ public class Xls extends Executor
 			cell.setCellValue(new HSSFRichTextString(value));
 		}
 	}
-	
+
 	private boolean validateColIndex(int colIndex)
 	{
 		return colIndex > -1 && colIndex < activeWorkbook.getSpreadsheetVersion().getMaxColumns();
 	}
-	
+
 	private boolean validateRowIndex(int rowIndex)
 	{
 		return rowIndex > -1 && rowIndex < activeWorkbook.getSpreadsheetVersion().getMaxRows();
 	}
-	
-	private boolean workbookPresent()
+
+	private boolean isWorkbookPresent()
 	{
 		boolean result = true;
 		if (Objects.isNull(activeWorkbook))

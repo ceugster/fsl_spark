@@ -6,7 +6,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.prowidesoftware.swift.model.mx.AbstractMX;
 import com.prowidesoftware.swift.utils.Lib;
 
@@ -18,31 +18,19 @@ import ch.eugster.filemaker.fsl.Executor;
 
 		public static final String IDENTIFIER_KEY = "identifier";
 		
-		private final ObjectMapper mapper = new ObjectMapper();
-
-		public String convertCamt(String request)
+		public void convertCamt()
 		{
-			if (createRequestNode(request))
-			{
-				doConvertCamt();
-			}
-			return getResponse();
-		}
-		
-		private boolean doConvertCamt()
-		{
-			boolean result = true;
 			JsonNode xmlFileNode = getRequestNode().findPath(Key.XML_FILE.key());
 			if (xmlFileNode.isTextual())
 			{
 				File file = new File(xmlFileNode.asText());
 				if (file.isFile())
 				{
-					result = readXmlFileAndConvertToJson(file);
+					readXmlFileAndConvertToJson(file);
 				}
 				else
 				{
-					result = addErrorMessage("'" + file.getName()+ "' is not a valid xml file");
+					addErrorMessage("'" + file.getName()+ "' is not a valid xml file");
 				}
 			}
 			else if (xmlFileNode.isMissingNode())
@@ -53,11 +41,11 @@ import ch.eugster.filemaker.fsl.Executor;
 					File file = new File(jsonFileNode.asText());
 					if (file.isFile())
 					{
-						result = readJsonFileAndConvertToXml(file);
+						readJsonFileAndConvertToXml(file);
 					}
 					else
 					{
-						result = addErrorMessage("'" + file.getName()+ "' is not a valid json file");
+						addErrorMessage("'" + file.getName()+ "' is not a valid json file");
 					}
 				}
 				else if (jsonFileNode.isMissingNode())
@@ -66,7 +54,7 @@ import ch.eugster.filemaker.fsl.Executor;
 					if (xmlContentNode.isTextual())
 					{
 						String xml = xmlContentNode.asText();
-						result = convertXmlToJson(xml);
+						convertXmlToJson(xml);
 					}
 					else if (xmlContentNode.isMissingNode())
 					{
@@ -74,16 +62,15 @@ import ch.eugster.filemaker.fsl.Executor;
 						if (jsonContentNode.isTextual())
 						{
 							String json = jsonContentNode.asText();
-							result = convertJsonToXml(json);
+							convertJsonToXml(json);
 						}
 						else if (jsonContentNode.isMissingNode())
 						{
-							result = addErrorMessage("missing argument, one of '" + Key.XML_FILE.key() + "', '" + Key.XML_CONTENT.key() + "', " + Key.JSON_FILE.key() + "', or '" + Key.JSON_CONTENT.key() + "'");
+							addErrorMessage("missing argument, one of '" + Key.XML_FILE.key() + "', '" + Key.XML_CONTENT.key() + "', " + Key.JSON_FILE.key() + "', or '" + Key.JSON_CONTENT.key() + "'");
 						}
 					}
 				}
 			}
-			return result;
 		}
 
 //		public String extract(String request) throws JsonMappingException, JsonProcessingException

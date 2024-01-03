@@ -4,14 +4,14 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    	<string>ch.eugster.filemaker.fsl.Fsl</string>
+    	<string>ch.eugster.filemaker.fsl</string>
     <key>ServiceDescription</key>
     	<string>FSL Server</string>
     <key>RunAtLoad</key>
     	<true/>
     <key>ProgramArguments</key>
         <array>
-            <string>/opt/Fsl/Fsl.sh</string>
+            <string>/opt/fsl_spark/fsl_spark_mac.sh</string>
         </array>
 </dict>
 </plist>

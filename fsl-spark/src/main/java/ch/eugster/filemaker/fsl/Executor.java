@@ -40,22 +40,22 @@ public abstract class Executor
 		{
 			if (method.getModifiers() == Modifier.PUBLIC)
 			{
-				if (method.getName().equals(command) && method.getParameterCount() == 2)
+				if (method.getName().equals(command))
 				{
-					Class<?>[] types = method.getParameterTypes();
+//					Class<?>[] types = method.getParameterTypes();
 					found = true;
-					for (Class<?> type : types)
-					{
-						if (!ObjectNode.class.equals(type))
-						{
-							found = false;
-						}
-					}
-					if (found)
-					{
+//					for (Class<?> type : types)
+//					{
+//						if (!String.class.equals(type))
+//						{
+//							found = false;
+//						}
+//					}
+//					if (found)
+//					{
 						try
 						{
-							method.invoke(this, requestNode, responseNode);
+							method.invoke(this);
 							responseNode.put(Executor.STATUS, responseNode.has(Executor.ERRORS) ? Executor.ERROR : Executor.OK);
 						}
 						catch (Exception e)
@@ -69,7 +69,7 @@ public abstract class Executor
 							errors.add(Objects.isNull(e.getLocalizedMessage()) ? e.getClass().getName() : e.getLocalizedMessage());
 						}
 						break;
-					}
+//					}
 				}
 			}
 		}

@@ -1,10 +1,10 @@
 [Unit]
-Description=fsl-server
+Description=fsl-server-linux
 After=network.target
 
 [Service]
-ExecStart=/opt/Fsl/Fsl.sh
-ExecReload=/opt/Fsl/Fsl.sh graceful
+ExecStart=/opt/fsl_spark/fsl_spark_linux.sh
+ExecReload=/opt/fsl_spark/fsl_spark_linux.sh graceful
 Type=notify
 Restart=always
 
