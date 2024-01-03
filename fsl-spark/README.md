@@ -4,7 +4,7 @@ Fsl was previously thought as plugin for FileMaker based on ScriptMaster by 360w
 
 ## Common
 
-FileMaker allows REST requests with it's command **Insert From URL**. This opportunity uses **Fsl** for several functions. The **Fsl** Server runs as a service on Windows, MacOS and Linux. So it is possible to run **Fsl** local or on a server, where several users need access. Starting with version 1.0.0 there are functions available to create and fill in Excel files, create swiss qrbills, and convert some file formats. See details below.
+FileMaker allows REST requests with it's command **Insert From URL**. This opportunity uses **Fsl** for several functions. The **Fsl** Server runs as a service on Windows, MacOS and Linux. So it is possible to run **Fsl** local or on a server, where several users need access. Starting with version 1.0.0 there are functions available to create and fill in Excel files, generate swiss qrbills, and convert some file formats. See details below.
 
 **Fsl** makes use of several open source libraries to fulfill its tasks:
 
@@ -15,39 +15,36 @@ spark-core:
 Simply download the zip file to a convenient directory and extract it. You will find a new directory named **Fsl**. This directory contains a number of files:
 
 - ch.eugster.filemaker.fsl.plist
-- Fsl_Linux.sh
-- Fsl_Mac.sh
-- Fsl-X.X.X-jar-with-dependencies.jar
-- Fsl-X.X.X.jar
-- Fsl.bat
+- fsl_spark_linux.sh
+- fsl_spark_mac.sh
+- fsl_spark_win.bat
+- fsl-spark-X.X.X-jar-with-dependencies.jar
+- fsl-spark-X.X.X.jar
 - nssm-2.24.zip
 
 Depending on the os you will install **Fsl** on, you need a subset of these files. Let me show you tested examples for Linux, MacOS and Windows. Suppose we are logged on as root, or, on Windows as Administrator and residing within the new directory **Fsl**.
 
 ### Linux
 
-1. Create a directory /opt/Fsl/
-2. Copy the file Fsl-X.X.X-jar-with-dependencies.jar to this directory
-3. Copy the file Fsl_Linux.sh and rename it to **Fsl.sh**
-```
-$ cp Fsl_Linux.sh /opt/Fsl/Fsl.sh
-```
+1. Create a directory /opt/fsl_spark/
+2. Copy the file fsl-spark-X.X.X-jar-with-dependencies.jar to this directory
+3. Copy the file fsl_spark_linux.sh
 4. Check the path to java in this file and replace it with the real path if it does not point to an existing java executable
 5. Check if the installation at this point works by executing the following command in a terminal
 ```
-$ /opt/Fsl/Fsl.sh
+$ /opt/fsl_spark/fsl_spark_linux.sh
 ```
 6. If you see as result something like --INFO: Started @585ms--, then the installation at this point is ok
 7. Stop the program
-8. Copy the file fsl-server.service to the directory /etc/systemd/system
+8. Copy the file fsl-server-linux.service to the directory /etc/systemd/system
 9. Enable and run the service
 ```
-$ systemctl enable fsl-server.service
-$ systemctl start fsl-server.service  // or reboot
+$ systemctl enable fsl-server-linux.service
+$ systemctl start fsl-server-linux.service  // or reboot
 ```
 10. Check if the service is running by executing
 ```
-$ systemctl status fsl-server.service
+$ systemctl status fsl-server-linux.service
 ```
 and/or
 ```
@@ -57,16 +54,13 @@ $ curl http://localhost:4567/fsl/Fsl.version --data {}
 
 ### MacOS
 
-1. Create a directory /opt/Fsl/
-2. Copy the file Fsl-X.X.X-jar-with-dependencies.jar to this directory
-3. Copy the file Fsl_Mac.sh and rename it to **Fsl.sh**
-```
-$ cp Fsl_Mac.sh /opt/Fsl/Fsl.sh
-```
+1. Create a directory /opt/fsl_spark/
+2. Copy the file fsl-spark-X.X.X-jar-with-dependencies.jar to this directory
+3. Copy the file fsl_spark_mac.sh
 4. Check the path to java in this file and replace it with the real path if it does not point to an existing java executable
 5. Check if the installation at this point works by executing the following command in a terminal
 ```
-$ /opt/Fsl/Fsl.sh
+$ /opt/fsl_spark/fsl_spark_mac.sh
 ```
 6. If you see as result something like --INFO: Started @585ms--, then the installation at this point is ok
 7. Stop the program
@@ -83,19 +77,19 @@ $ curl http://localhost:4567/fsl/Fsl.version --data {}
 
 ### Windows
 
-1. Create a directory C:\Program Files\Fsl\
-2. Copy the file Fsl-X.X.X-jar-with-dependencies.jar to this directory
-3. Copy the file Fsl.bat
+1. Create a directory C:\Program Files\fsl_spark\
+2. Copy the file fsl-spark-X.X.X-jar-with-dependencies.jar to this directory
+3. Copy the file fsl_spark_win.bat
 4. Check the path to java in this file and replace it with the real path if it does not point to an existing java executable
 5. Check if the installation at this point works by executing the following command in a terminal
 ```
-$ ./Fsl.bat
+$ ./fsl_spark_win.bat
 ```
 6. If you see as result something like --INFO: Started @585ms--, then the installation at this point is ok
 7. Stop the program
 8. Unzip the file nssp-2.24.zip and execute the expanded file nssm.exe
 ```
-$ nssm.exe install c:\Program Files\Fsl\Fsl.bat
+$ nssm.exe install c:\Program Files\fsl_spark\fsl_spark_win.bat
 ```
 9. Start the service
 10. Check if the service is running by executing
@@ -113,8 +107,8 @@ Example: You want to create a swiss qrbill in FileMaker:
 - Create a json object using JSONSetElement:
 
 ```
-set variable [ $json ; value: 
-JSONSetElement ( $json ; 
+set variable [ $request ; value: 
+JSONSetElement ( $request ; 
     [ "amount" ; 287.3 ; JSONNumber ] ;
     [ "currency" ; "CHF" ; JSONString ] ;
     [ "iban" ; "CH4431999123000889012" ; JSONString ] ;
@@ -134,10 +128,10 @@ JSONSetElement ( $json ;
 )
 ```
 
-- After setting the variable (e.g. $json) run the command:
+- After setting the variable (e.g. $request) run the command:
 
 ```
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/QRBill.generate" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/QRBill.generate" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 In the example above while **http://localhost:4567/fsl/** is fix, the part **QRBill.generate** is interchangeable with other commands, that are listed and explained below. It consists of two parts:
 
@@ -149,28 +143,27 @@ The **QRBill** part in the example is the so named the module part, while **gene
 Variable setzen [ $status ; Wert: JSONGetElement ( $response ; "status" ) ] 
 ```
 
-If **$status** is "OK" then the command ended successfully. If it is "Fehler" then you can get the element "errors", which is a list of error messages.
+If **$status** is "OK" then the command ended successfully. You may fill a container field/variable as:
 
 ```
- Set Field [ Table::Field ; Base64Decode ( JSONGetElement ( $response ; "result" ) ; "QRBill.pdf" ) ]
- If [ $status = "Fehler" ]
-     Set Variable [ $errors ; Value: JSONGetElement ( $response ; "errors" ) ]
-     Set Variable [ $count ; Value: ElementsCount ( $errors ) ]
-     Set Variable [ $index ; Value: 1 ]
-     Loop
-         Set Variable [ $error ; ElementsMiddle ( $errors ; $index ; 1 ) ]
-         Set Variable [ $index ; $index + 1 ) ]
-		Exit Loop If [ $index > $count ]         
-     End Loop
+ Set Variable [ $QRBill ; Base64Decode ( JSONGetElement ( $response ; "result" ) ; "QRBill.pdf" ) ]
+```
+
+In the case above the result has to be decoded to get the pdf content
+
+If **$status** is "Fehler" then you can get the element "errors", which is a list of error messages.
+
+```
+If [ $status = "Fehler" ]
+    Set Variable [ $errors ; Value: JSONGetElement ( $response ; "errors" ) ]
+    Set Variable [ $count ; Value: ElementsCount ( $errors ) ]
+    Set Variable [ $index ; Value: 1 ]
+    Loop
+        Set Variable [ $error ; ElementsMiddle ( $errors ; $index ; 1 ) ]
+        Set Variable [ $index ; $index + 1 ) ]
+        Exit Loop If [ $index > $count ]         
+    End Loop
 End If  
-     
-```
-
-- If **$status** equals "OK" then you can store the generated qrbill from **$response** by extracting it with the keyword **result**:
-
-
-```
- Set Field [ Table::Field ; Base64Decode ( JSONGetElement ( $response ; "result" ) ; "QRBill.pdf" ) ]
 ```
 
 ## Xls 
@@ -184,17 +177,17 @@ Activates the sheet with given name if present, else returns error
 ##### Example
 
 ```
-JSONSetElement ( $json ; "sheet" ; "mySheet" ; JSONString )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.activateSheet" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+JSONSetElement ( $request ; "sheet" ; "mySheet" ; JSONString )
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.activateSheet" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 or, with optional parameter "workbook"
 
 ```
-JSONSetElement ( $json ; 
+JSONSetElement ( $request ; 
     [ "sheet" ; "mySheet" ; JSONString ] ;
     [ "workbook" ; "myWorkbook" ; JSONString ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.activateSheet" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.activateSheet" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters 
@@ -219,8 +212,8 @@ Activates the workbook with given name, if present, else returns error
 ##### Example
 
 ```
-JSONSetElement ( $json ; "workbook" ; "myWorkbook" ; JSONString )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.activateWorkbook" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+JSONSetElement ( $request ; "workbook" ; "myWorkbook" ; JSONString )
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.activateWorkbook" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 ##### Request parameters 
 
@@ -274,19 +267,19 @@ Copies a cell or a range of cells to the given target cell or range. If source r
 Example 1: in the following examples several forms to define **source** and **target** parameters are used: source has a range address as used in Excel too, target.top_left defines cell indices to define the top row and right column of the top_left cell of the range. target.right takes an integer (3) that defines the target bottom_right cells column index and target.bottom takes an integer too to define the bottom_right cell's row index. Take notice, that the numbers to define the cell's row and column indices are zero based, i.e. bottom 3 and right 3 means "D4", not "C3" as one could think.
 
 ```
-JSONSetElement ( $json ; 
+JSONSetElement ( $request ; 
     [ "source.range" ; "A1:B2" ; JSONString ] ;
     [ "target.top_left" ; "C3" ; JSONString ] ;
     [ "target.right" ; 3 ; JSONNumber ] ;
     [ "target.bottom : 3 ; JSONNumber ]
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.copy" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.copy" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 Example 2:  This examples defines the same ranges as above. I contains a source sheet and a target sheet too, that means, the source range on sheet_1 will be copied to the range in sheet_2. 
 
 ```
-JSONSetElement ( $json ;
+JSONSetElement ( $request ;
     [ "source.top" ; 0 ; JSONNumber ] ;
     [ "source.left" ; 0 ; JSONNumber ] ;
     [ "source.bottom_right : "D4" ; JSONNumber ;
@@ -294,38 +287,38 @@ JSONSetElement ( $json ;
     [ "target.range" ; "C3:D4" ; JSONString ] ;
     [ "target.sheet" ; "sheet_2" ; JSONString ]
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.copy" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.copy" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 Example 3: If the copy is done withing one sheet, you can omit the keyword sheet. If want to use an other sheet then the active one, you provide the sheet at root of the json object. 
 
 ```
-JSONSetElement ( $json ;
+JSONSetElement ( $request ;
     [ "sheet" ; "mySheet" ; JSONString | ;
     [ "source.range" ; "A1:B2 ; JSONNumber ] ;
     [ "target.range" ; "C3:D4" ; JSONString ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.copy" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.copy" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 Example 4: If you want to copy the content of one cell to a range of cells:
 
 ```
-JSONSetElement ( $json ;
+JSONSetElement ( $request ;
     [ "source.cell" ; "A1" ; JSONString | ;
     [ "target.range" ; "C3:D4" ; JSONString ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.copy" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.copy" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 Example 5: If you want to copy one cell to one cell 
 
 ```
-JSONSetElement ( $json ;
+JSONSetElement ( $request ;
     [ "source.cell" ; "A1" ; JSONString | ;
     [ "target.cell" ; "D4" ; JSONString ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.copy" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.copy" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -352,11 +345,11 @@ creates and activates a sheet
 ##### Example
 
 ```
-JSONSetElement ( $json ;
+JSONSetElement ( $request ;
     [ "sheet" ; "mySheet" ; JSONString | ;
     [ "workbook" ; "myWorkbook" ; JSONString ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.createAndActivateSheet" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.createAndActivateSheet" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -377,10 +370,10 @@ creates and activates a workbook
 ##### Example
 
 ```
-JSONSetElement ( $json ;
+JSONSetElement ( $request ;
     [ "workbook" ; "myWorkbook" ; JSONString ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.createAndActivateWorkbook" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.createAndActivateWorkbook" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -400,11 +393,11 @@ creates a sheet but does not activate it
 ##### Example
 
 ```
-JSONSetElement ( $json ;
+JSONSetElement ( $request ;
     [ "sheet" ; "mySheet" ; JSONString | ;
     [ "workbook" ; "myWorkbook" ; JSONString ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.createSheet" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.createSheet" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -425,10 +418,10 @@ creates a workbook but does not activate it
 ##### Example
 
 ```
-JSONSetElement ( $json ;
+JSONSetElement ( $request ;
     [ "workbook" ; "myWorkbook" ; JSONString ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.createWorkbook" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.createWorkbook" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -448,7 +441,7 @@ returns the name of the active sheet, if any, else error
 ##### Example
 ```
 JSONSetElement ( "{}" )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.getActiveSheet" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.getActiveSheet" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -471,7 +464,7 @@ returns the name of the active workbook, if any, else error
 
 ```
 JSONSetElement ( "{}" )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.getActiveWorkbook" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.getActiveWorkbook" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -495,14 +488,14 @@ Example 1: without parameters the active workbook is selected, else error
 
 ```
 JSONSetElement ( "{}" )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.getSheets" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.getSheets" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 Example 2: with parameter "workbook", the workbook of which the sheets should be return 
 
 ```
-JSONSetElement ( $json ; "workbook" ; "myWorkbook" ; JSONString )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.getSheets" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+JSONSetElement ( $request ; "workbook" ; "myWorkbook" ; JSONString )
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.getSheets" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -529,7 +522,7 @@ Without parameters the active workbook is selected, else error
 
 ```
 JSONSetElement ( "{}" )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.getWorkbookNames" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.getWorkbookNames" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -550,8 +543,8 @@ releases a workbook if it exists, else returns an error
 ##### Example
 
 ```
-JSONSetElement ( $json ; "workbook" ; "myWorkbook" ; JSONString )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.releaseWorkbook" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+JSONSetElement ( $request ; "workbook" ; "myWorkbook" ; JSONString )
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.releaseWorkbook" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -572,7 +565,7 @@ releases all existing workbooks
 
 ```
 JSONSetElement ( "{}" )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.releaseWorkbooks" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.releaseWorkbooks" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -591,7 +584,7 @@ saves and releases a workbook if it exists, else returns an error
 
 ```
 JSONSetElement ( "{ "workbook" ; "myWorkbook" }" )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.saveAndReleaseWorkbook" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.saveAndReleaseWorkbook" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameter
@@ -611,8 +604,8 @@ saves a workbook if it exists, else returns an error. The workbook will not be r
 ##### Example
 
 ```
-JSONSetElement ( $json ; "workbook" ; "myWorkbook" ; JSONString )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.saveWorkbook" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+JSONSetElement ( $request ; "workbook" ; "myWorkbook" ; JSONString )
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.saveWorkbook" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -633,12 +626,12 @@ set cell values or formulae. There are two possibilies how to fill cells.
 ##### Example
 
 ```
-JSONSetElement ( $json ; 
+JSONSetElement ( $request ; 
     [ "cell" ; "A1" ; JSONString ] ;
     [ "values[0] ; 123.45 ; JSONNumber ] ;
     [ "values[1] ; 76.54 ; JSONNumber ]
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.setCells" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.setCells" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -657,13 +650,13 @@ none
 ##### Example
 
 ```
-JSONSetElement ( $json ; 
+JSONSetElement ( $request ; 
     [ "cell[0]" ; "A1" ; JSONString ] ;
     [ "cell[1]" ; "B2" ; JSONString ] ;
     [ "values[0] ; 123.45 ; JSONNumber ] ;
     [ "values[1] ; 76.54 ; JSONNumber ]
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.setCells" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.setCells" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -684,11 +677,11 @@ define print setup options
 ##### Example
 
 ```
-JSONSetElement ( $json ; 
+JSONSetElement ( $request ; 
     [ "orientation" ; "PORTRAIT" ; JSONString ] ;
     [ "copies" ; 2 ; JSONNUMBER ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.setPrintSetup" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.setPrintSetup" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -710,12 +703,12 @@ Set the headers of a sheet. There are three headers, one on the left, one in the
 
 ##### Example
 ```
-JSONSetElement ( $json ; 
+JSONSetElement ( $request ; 
     [ "left" ; "This is the left header" ; JSONString ] ;
     [ "center" ; "This is the center header" ; JSONString ] 
     [ "right" ; "This is the right header" ; JSONString ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.setHeaders" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.setHeaders" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -739,12 +732,12 @@ Set the footers of a sheet. There are three footers, one on the left, one in the
 ##### Example
 
 ```
-JSONSetElement ( $json ; 
+JSONSetElement ( $request ; 
     [ "left" ; "This is the left footer" ; JSONString ] ;
     [ "center" ; "This is the center footer" ; JSONString ] 
     [ "right" ; "This is the right footer" ; JSONString ] 
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.setFooters" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.setFooters" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -768,7 +761,7 @@ To style fonts
 ##### Example
 
 ```
-JSONSetElement ( $json ; 
+JSONSetElement ( $request ; 
     [ "cell" ; "A1" ; JSONString ] ;
     [ "name" ; "Courier New" ; JSONString ] ;
     [ "size" ; 12 ; JSONNumber ] ;
@@ -779,7 +772,7 @@ JSONSetElement ( $json ;
     [ "type_offset" ; 0 ; JSONNumber ] ;
     [ "color" ; 0 ; JSONNumber ] ;
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.applyFontStyles" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.applyFontStyles" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -809,7 +802,7 @@ To style cells
 ##### Example 
 
 ```
-JSONSetElement ( $json ; 
+JSONSetElement ( $request ; 
     [ "alignment.horizontal" ; "Courier New" ; JSONString ] ;
     [ "alignment.vertical" ; "A1" ; JSONString ] ;
     [ "border.style.top" ; "THIN" ; JSONString ] ;
@@ -828,7 +821,7 @@ JSONSetElement ( $json ;
     [ "wrap_text" ; 1 ; JSONNumber ] ;
     [ "font" ; 0 ; JSONNumber ] ;
 )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.applyCellStyles" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.applyCellStyles" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -865,8 +858,8 @@ Autosize columns in the given range.
 ##### Example
 
 ```
-JSONSetElement ( $json ; "range" ; "A1:G1" ; JSONString )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.autoSizeColumns" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+JSONSetElement ( $request ; "range" ; "A1:G1" ; JSONString )
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.autoSizeColumns" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -888,8 +881,8 @@ Rotate the content of the cells to given degrees.
 ##### Example
 
 ```
-JSONSetElement ( $json ; "rotation" ; 90 ; JSONNumber )
-Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.rotateCells" ; cURL-Options: " --data @$json --header \"Content-Type: application/json\"" ] 
+JSONSetElement ( $request ; "rotation" ; 90 ; JSONNumber )
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Xls.rotateCells" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
 ```
 
 ##### Request parameters
@@ -1272,7 +1265,7 @@ an integer that provides the degree of rotation for the text in the cell. Note: 
 Example
 
 ```
-JSONSetElement ( $json ; "rotation" ; 90 ; JSONNumber )
+JSONSetElement ( $request ; "rotation" ; 90 ; JSONNumber )
 ```
 
 ##### row
@@ -1282,7 +1275,7 @@ an integer value containing the row index (zero-based) of a cell
 Example
 
 ```
-JSONSetElement ( $json ; "row" ; 24 ; JSONNumber )
+JSONSetElement ( $request ; "row" ; 24 ; JSONNumber )
 ```
 
 ##### sheet
@@ -1292,7 +1285,7 @@ a string containing the name of a sheet
 Example
 
 ```
-JSONSetElement ( $json ; "sheet" ; "mySheet" ; JSONString )
+JSONSetElement ( $request ; "sheet" ; "mySheet" ; JSONString )
 ```
 
 ##### shrink_to_fit
@@ -1303,7 +1296,7 @@ JSONSetElement ( $json ; "sheet" ; "mySheet" ; JSONString )
 | 1 | shrink to fit the text of a cell
 
 ```
-JSONSetElement ( $json ; "shrink_to_fit" ; 0 ; JSONNumber )
+JSONSetElement ( $request ; "shrink_to_fit" ; 0 ; JSONNumber )
 ```
 
 ##### size
@@ -1311,7 +1304,7 @@ JSONSetElement ( $json ; "shrink_to_fit" ; 0 ; JSONNumber )
 contains the size of the font in points
 
 ```
-JSONSetElement ( $json ; "size" ; 12 ; JSONNumber )
+JSONSetElement ( $request ; "size" ; 12 ; JSONNumber )
 ```
 
 ##### source
@@ -1398,13 +1391,13 @@ a string containing the name of a workbook
 Example
 
 ```
-JSONSetElement ( $json ; "workbook" ; "myWorkbook" ; JSONString )
+JSONSetElement ( $request ; "workbook" ; "myWorkbook" ; JSONString )
 ```
 
 or
 
 ```
-JSONSetElement ( $json ; "workbook" ; Get ( DocumentsPath ) & "myWorkbook.xlsx" ; JSONString )
+JSONSetElement ( $request ; "workbook" ; Get ( DocumentsPath ) & "myWorkbook.xlsx" ; JSONString )
 ```
 
 ##### wrap_text
@@ -1417,6 +1410,6 @@ get whether the text should be wrapped
 | 1 | set wrap text on
 
 ```
-JSONSetElement ( $json ; "wrap_text" ; 1 ; JSONNumber )
+JSONSetElement ( $request ; "wrap_text" ; 1 ; JSONNumber )
 ```
 
