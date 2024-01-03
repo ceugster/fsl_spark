@@ -58,992 +58,446 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import ch.eugster.filemaker.fsl.Executor;
 
 /**
- * 
- */
-/**
  * @author christian
  *
+ * @created 2023-07-24
+ * 
+ * @updated 
+ * 
+ * The public methods have to follow this convention:
+ * 
+ * - There is always one parameter of type string. This string must be a valid json object, that is a conversion to a jackson object node must be successfully done. The json object can contain zero or more attributes of valid json types, depending on the method called (see method descriptions).
+ * - There is always on return parameter of type string, This string too must be a valid json object as above. The json attribute 'status' is mandatory and contains either 'OK' or 'Fehler', depending on the result of the method. Occuring errors are documented in an array object named 'errors'. Depending on the method json attributes with information are returned. Valid attribute names are documented at the method.
+ * 
+ * There is a set of controlled attributes, that are recognized valid. @see ch.eugster.filemaker.fsl.xls.Key
  */
 public class Xls extends Executor
 {
 	public static Workbook activeWorkbook;
 
-	public void activateSheet(ObjectNode requestNode, ObjectNode responseNode)
+	/**
+	 * Set active sheet
+	 * 
+	 * @param sheet name (string) or index (integer)
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String activateSheet(String request)
 	{
-		boolean result = workbookPresent();
-		if (result)
+		if (createRequestNode(request))
 		{
-			JsonNode sheetNode = requestNode.findPath(Key.SHEET.key());
-			if (sheetNode.isTextual())
+			if (workbookPresent())
 			{
-				Sheet sheet = activeWorkbook.getSheet(sheetNode.asText());
-				if (Objects.nonNull(sheet))
-				{
-					if (activeWorkbook.getActiveSheetIndex() != activeWorkbook.getSheetIndex(sheet))
-					{
-						activeWorkbook.setActiveSheet(activeWorkbook.getSheetIndex(sheet));
-					}
-				}
-				else
-				{
-					result = addErrorMessage("sheet with name '" + sheetNode.asText() + "' does not exist");
-				}
-			}
-			else if (sheetNode.isMissingNode())
-			{
-				JsonNode indexNode = requestNode.findPath(Key.INDEX.key());
-				if (indexNode.isInt())
-				{
-					if (activeWorkbook.getNumberOfSheets() > indexNode.asInt())
-					{
-						if (activeWorkbook.getActiveSheetIndex() != indexNode.asInt())
-						{
-							activeWorkbook.setActiveSheet(indexNode.asInt());
-						}
-					}
-					else
-					{
-						result = addErrorMessage("sheet with " + Key.INDEX.key() + " " + indexNode.asInt() + " does not exist");
-					}
-				}
-				else if (indexNode.isMissingNode())
-				{
-					result = addErrorMessage("missing argument '" + Key.SHEET.key() + "' or '" + Key.INDEX.key() + "'");
-				}
-				else
-				{
-					result = addErrorMessage("illegal argument '" + Key.INDEX.key() + "'");
-				}
-			}
-			else
-			{
-				result = addErrorMessage("illegal argument '" + Key.SHEET.key() + "'");
-			}
-			if (result)
-			{
-				responseNode.put(Key.INDEX.key(), activeWorkbook.getActiveSheetIndex());
-				responseNode.put(Key.SHEET.key(), activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex()).getSheetName());
+				doActivateSheet();
 			}
 		}
+		return getResponse();
+	}
+	
+	/**
+	 * Return active sheet name and index
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String activeSheet(String request)
+	{
+		if (createRequestNode(request))
+		{
+			if (workbookPresent())
+			{
+				doGetActiveSheet();
+			}
+		}
+		return getResponse();
 	}
 
-	public void activeSheet(ObjectNode requestNode, ObjectNode responseNode)
+	/**
+	 * Return active sheet name and index
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String activeSheetPresent(String request)
 	{
-		boolean result = workbookPresent();
-		if (result)
+		if (createRequestNode(request))
 		{
-			try
+			if (workbookPresent())
 			{
-				Sheet sheet = activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex());
-				result = Objects.nonNull(sheet);
-				responseNode.put(Key.INDEX.key(), result ? 1 : 0);
-				responseNode.put(Key.SHEET.key(), result ? sheet.getSheetName() : "");
-			}
-			catch (IllegalArgumentException e)
-			{
-				responseNode.put(Key.INDEX.key(), 0);
-				responseNode.put(Key.SHEET.key(), "");
+				doActiveSheetPresent();
 			}
 		}
+		return getResponse();
 	}
 	
-	public void activeSheetPresent(ObjectNode requestNode, ObjectNode responseNode)
+	public String applyCellStyles(String request)
 	{
-		boolean result = workbookPresent();
-		if (result)
+		if (createRequestNode(request))
 		{
-			try
+			if (workbookPresent())
 			{
-				Sheet sheet = activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex());
-				result = Objects.nonNull(sheet);
-				responseNode.put(Executor.RESULT, result ? 1 : 0);
-			}
-			catch (IllegalArgumentException e)
-			{
-				responseNode.put(Executor.RESULT, 0);
+				doApplyCellStyles();
 			}
 		}
+		return getResponse();
 	}
 	
-	public void applyCellStyles(ObjectNode requestNode, ObjectNode responseNode)
+	public String applyFontStyles(String request)
 	{
-		boolean result = workbookPresent();
-		if (result)
+		if (createRequestNode(request))
 		{
-			Sheet sheet = getSheet(requestNode);
-			if (Objects.nonNull(sheet))
+			if (workbookPresent())
 			{
-				CellRangeAddress cellRangeAddress = null;
-				JsonNode cellNode = requestNode.findPath(Key.CELL.key());
-				if (!cellNode.isMissingNode())
-				{
-					CellAddress cellAddress = getCellAddress(cellNode);
-					cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getColumn());
-				}
-				else
-				{
-					JsonNode rangeNode = requestNode.findPath(Key.RANGE.key());
-					cellRangeAddress = getCellRangeAddress(rangeNode);
-				}
-				if (Objects.nonNull(cellRangeAddress))
-				{
-					Iterator<CellAddress> cellAddresses = cellRangeAddress.iterator();
-					while (cellAddresses.hasNext())
-					{
-						CellAddress cellAddress = cellAddresses.next();
-						Cell cell = getOrCreateCell(sheet, cellAddress);
-						if (Objects.nonNull(cell))
-						{
-							MergedCellStyle m = new MergedCellStyle(cell.getCellStyle());
-							result = m.applyRequestedStyles(requestNode, responseNode);
-							if (result)
-							{
-								CellStyle cellStyle = getCellStyle(sheet, m);
-								cell.setCellStyle(cellStyle);
-							}
-							else
-							{
-								break;
-							}
-						}
-						else
-						{
-							break;
-						}
-					}
-				}
+				doApplyFontStyles();
 			}
 		}
-	}
-
-	public void applyFontStyles(ObjectNode requestNode, ObjectNode responseNode)
-	{
-		if (workbookPresent())
-		{
-			Sheet sheet = getSheet(requestNode);
-			if (Objects.nonNull(sheet))
-			{
-				CellRangeAddress cellRangeAddress = null;
-				JsonNode cellNode = requestNode.findPath(Key.CELL.key());
-				if (!cellNode.isMissingNode())
-				{
-					CellAddress cellAddress = getCellAddress(cellNode);
-					cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getColumn());
-				}
-				else
-				{
-					JsonNode rangeNode = requestNode.findPath(Key.RANGE.key());
-					cellRangeAddress = getCellRangeAddress(rangeNode);
-				}
-				if (Objects.nonNull(cellRangeAddress))
-				{
-					Iterator<CellAddress> cellAddresses = cellRangeAddress.iterator();
-					while (cellAddresses.hasNext())
-					{
-						CellAddress cellAddress = cellAddresses.next();
-						Row row = sheet.getRow(cellAddress.getRow());
-						if (Objects.nonNull(row))
-						{
-							Cell cell = row.getCell(cellAddress.getColumn());
-							CellStyle cellStyle = cell.getCellStyle();
-							MergedCellStyle mcs = new MergedCellStyle(cellStyle);
-							int fontIndex = cellStyle.getFontIndex();
-							Font font = sheet.getWorkbook().getFontAt(fontIndex);
-							MergedFont m = new MergedFont(font);
-							if (m.applyRequestedFontStyles(requestNode, responseNode))
-							{
-								font = getFont(sheet, m);
-								if (font.getIndex() != fontIndex)
-								{
-									mcs.setFontIndex(font.getIndex());
-									cellStyle = getCellStyle(sheet, mcs);
-									cell.setCellStyle(cellStyle);
-								}
-							}
-							else
-							{
-								break;
-							}
-						}
-						else
-						{
-							break;
-						}
-					}
-				}
-			}
-		}
+		return getResponse();
 	}
 	
-	public void autoSizeColumns(ObjectNode requestNode, ObjectNode responseNode)
+	public String autoSizeColumns(String request)
 	{
-		if (workbookPresent())
+		if (createRequestNode(request))
 		{
-			Sheet sheet = getSheet(requestNode);
-			if (Objects.nonNull(sheet))
+			if (workbookPresent())
 			{
-				CellRangeAddress cellRangeAddress = null;
-				JsonNode cellNode = requestNode.findPath(Key.CELL.key());
-				if (cellNode.isMissingNode())
-				{
-					JsonNode rangeNode = requestNode.findPath(Key.RANGE.key());
-					if (!rangeNode.isMissingNode())
-					{
-						cellRangeAddress = getCellRangeAddress(rangeNode);
-					}
-				}
-				else
-				{
-					CellAddress cellAddress = getCellAddress(cellNode);
-					cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getRow(), cellAddress.getColumn());
-				}
-				if (Objects.nonNull(cellRangeAddress))
-				{
-					int leftCol = cellRangeAddress.getFirstColumn();
-					int rightCol = cellRangeAddress.getLastColumn();
-					for (int colIndex = leftCol; colIndex <= rightCol; colIndex++)
-					{
-						sheet.autoSizeColumn(colIndex);
-					}
-				}
+				doAutoSizeColumns();
 			}
 		}
+		return getResponse();
 	}
 	
-	public void copyCells(ObjectNode requestNode, ObjectNode responseNode)
+	public String copyCells(String request)
 	{
-		boolean result = workbookPresent();
-		if (result)
+		if (createRequestNode(request))
 		{
-			Sheet sourceSheet = getSheet(requestNode);
-			Sheet targetSheet = sourceSheet;
-			CellRangeAddress sourceCellRangeAddress = null;
-			CellRangeAddress targetCellRangeAddress = null;
-			JsonNode sourceNode = requestNode.findPath(Key.SOURCE.key());
-			if (sourceNode.isTextual())
+			if (workbookPresent())
 			{
-				sourceCellRangeAddress = getCellRangeAddress(sourceNode);
-				if (Objects.nonNull(sourceCellRangeAddress))
-				{
-					JsonNode targetNode = requestNode.findPath(Key.TARGET.key());
-					if (targetNode.isTextual())
-					{
-						targetCellRangeAddress = getCellRangeAddress(targetNode);
-						if (Objects.isNull(targetCellRangeAddress))
-						{
-							result = addErrorMessage("illegal argument '" + targetNode.asText() + "'");
-						}
-					}
-					else if (targetNode.isObject())
-					{
-						targetSheet = getSheet(ObjectNode.class.cast(targetNode));
-						targetCellRangeAddress = getCellRangeAddress(targetNode);
-					}
-					else
-					{
-						result = addErrorMessage("illegal argument '" + Key.TARGET.key() + "'");
-					}
-				}
-				else
-				{
-					result = addErrorMessage("illegal argument '" + sourceNode.asText() + "'");
-				}
-			}
-			else if (sourceNode.isObject())
-			{
-				sourceSheet = getSheet(ObjectNode.class.cast(sourceNode));
-				sourceCellRangeAddress = getCellRangeAddress(sourceNode);
-				JsonNode targetNode = requestNode.findPath(Key.TARGET.key());
-				if (targetNode.isTextual())
-				{
-					targetCellRangeAddress = getCellRangeAddress(targetNode);
-					if (Objects.isNull(targetCellRangeAddress))
-					{
-						result = addErrorMessage("illegal argument '" + targetNode.asText() + "'");
-					}
-				}
-				else if (targetNode.isObject())
-				{
-					targetSheet = getSheet(ObjectNode.class.cast(targetNode));
-					targetCellRangeAddress = getCellRangeAddress(targetNode);
-				}
-				else
-				{
-					result = addErrorMessage("illegal argument '" + Key.TARGET.key() + "'");
-				}
-			}
-			else
-			{
-				result = addErrorMessage("illegal argument '" + Key.SOURCE.key() + "'");
-			}
-			if (Objects.nonNull(sourceCellRangeAddress) && Objects.nonNull(targetCellRangeAddress))
-			{
-				if (sourceSheet == targetSheet)
-				{
-					if (sourceCellRangeAddress.intersects(targetCellRangeAddress))
-					{
-						result = addErrorMessage("source range and target range must not intersect");
-					}
-				}
-				if (result)
-				{
-					if (sourceCellRangeAddress.getNumberOfCells() == 1)
-					{
-						Row sourceRow = sourceSheet.getRow(sourceCellRangeAddress.getFirstRow());
-						if (Objects.nonNull(sourceRow))
-						{
-							Cell sourceCell = sourceRow.getCell(sourceCellRangeAddress.getFirstColumn());
-							if (Objects.nonNull(sourceCell))
-							{
-								Iterator<CellAddress> targetAddresses = targetCellRangeAddress.iterator();
-								while (targetAddresses.hasNext())
-								{
-									CellAddress sourceAddress = new CellAddress(sourceCell);
-									CellAddress targetAddress = targetAddresses.next();
-									int rowDiff = targetAddress.getRow() - sourceAddress.getRow();
-									int colDiff = targetAddress.getColumn() - sourceAddress.getColumn();
-									if (sourceCell.getCellType().equals(CellType.FORMULA))
-									{
-										String copiedFormula = copyFormula(sourceSheet, sourceCell.getCellFormula(),
-												rowDiff, colDiff);
-										Cell targetCell = getOrCreateCell(targetSheet, targetAddress);
-										targetCell.setCellFormula(copiedFormula);
-									}
-									else
-									{
-										int targetTop = targetCellRangeAddress.getFirstRow();
-										int targetBottom = targetCellRangeAddress.getLastRow();
-										int targetLeft = targetCellRangeAddress.getFirstColumn();
-										int targetRight = targetCellRangeAddress.getLastColumn();
-										for (int r = targetTop; r <= targetBottom; r++)
-										{
-											Row targetRow = getOrCreateRow(targetSheet, r);
-											for (int cell = targetLeft; cell <= targetRight; cell++)
-											{
-												Cell targetCell = getOrCreateCell(targetRow, cell);
-												if (sourceCell.getCellType().equals(CellType.STRING))
-												{
-													targetCell.setCellValue(sourceCell.getRichStringCellValue());
-													
-												}
-												else if (sourceCell.getCellType().equals(CellType.NUMERIC))
-												{
-													targetCell.setCellValue(sourceCell.getNumericCellValue());
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					else if (sourceCellRangeAddress.getNumberOfCells() == targetCellRangeAddress.getNumberOfCells()
-							&& sourceCellRangeAddress.getLastRow()
-							- sourceCellRangeAddress.getFirstRow() == targetCellRangeAddress.getLastRow()
-							- targetCellRangeAddress.getFirstRow())
-					{
-						Iterator<CellAddress> sourceAddresses = sourceCellRangeAddress.iterator();
-						Iterator<CellAddress> targetAddresses = targetCellRangeAddress.iterator();
-						while (sourceAddresses.hasNext())
-						{
-							CellAddress sourceAddress = sourceAddresses.next();
-							Row sourceRow = sourceSheet.getRow(sourceAddress.getRow());
-							if (Objects.nonNull(sourceRow))
-							{
-								Cell sourceCell = sourceRow.getCell(sourceAddress.getColumn());
-								if (Objects.nonNull(sourceCell))
-								{
-									CellAddress targetAddress = targetAddresses.next();
-									Row targetRow = getOrCreateRow(targetSheet, targetAddress.getRow());
-									Cell targetCell = getOrCreateCell(targetRow, targetAddress.getColumn());
-									copyCell(sourceCell, targetCell);
-								}
-							}
-						}
-					}
-					else
-					{
-						result = addErrorMessage("source and target range dimensions must not differ");
-					}
-				}
-				else
-				{
-					result = addErrorMessage("missing argument 'sheet' for source");
-				}
-			}
-			else
-			{
-				result = addErrorMessage("missing argument 'target'");
+				doCopyCells();
 			}
 		}
+		return getResponse();
 	}
 	
-	public void createSheet(ObjectNode requestNode, ObjectNode responseNode)
+	/**
+	 * Create sheet
+	 * 
+	 * @param sheet name (optional)
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String createSheet(String request)
 	{
-		boolean result = workbookPresent();
-		if (result)
+		if (createRequestNode(request))
 		{
-			Sheet sheet = null;
-			JsonNode sheetNode = requestNode.findPath(Key.SHEET.key());
-			if (sheetNode.isMissingNode())
+			if (workbookPresent())
 			{
-				sheet = activeWorkbook.createSheet();
-			}
-			else if (sheetNode.isTextual())
-			{
-				try
-				{
-					sheet = activeWorkbook.createSheet(sheetNode.asText());
-				}
-				catch (IllegalArgumentException e)
-				{
-					result = addErrorMessage("illegal argument 'sheet' ('" + sheetNode.asText() + "' already exists)");
-				}
-			}
-			if (result)
-			{
-				responseNode.put(Key.SHEET.key(), sheet.getSheetName());
-				responseNode.put(Key.INDEX.key(), activeWorkbook.getSheetIndex(sheet));
+				doCreateSheet();
 			}
 		}
-	}
-
-	public void createWorkbook(ObjectNode requestNode, ObjectNode responseNode)
-	{
-		Type type = null;
-		JsonNode typeNode = requestNode.findPath(Key.TYPE.key());
-		if (typeNode.isTextual())
-		{
-			type = Type.findByExtension(typeNode.asText());
-		}
-		else if (typeNode.isMissingNode())
-		{
-			type = Type.XLSX;
-		}
-		if (Objects.nonNull(type))
-		{
-			switch (type)
-			{
-				case XLSX:
-				{
-					activeWorkbook = new XSSFWorkbook();
-				}
-				case XLS:
-				{
-					activeWorkbook = new HSSFWorkbook();
-				}
-			}
-		}
-		else
-		{
-			addErrorMessage("illegal extension '" + typeNode.asText() + "'");
-		}
-	}
-
-	public void dropSheet(ObjectNode requestNode, ObjectNode responseNode)
-	{
-		if (workbookPresent())
-		{
-			JsonNode sheetNode = requestNode.findPath(Key.SHEET.key());
-			if (sheetNode.isTextual())
-			{
-				Sheet sheet = activeWorkbook.getSheet(sheetNode.asText());
-				if (Objects.nonNull(sheet))
-				{
-					activeWorkbook.removeSheetAt(activeWorkbook.getSheetIndex(sheet));
-				}
-				else
-				{
-					addErrorMessage("sheet with name '" + sheetNode.asText() + "' does not exist");
-				}
-			}
-			else if (sheetNode.isMissingNode())
-			{
-				JsonNode indexNode = requestNode.findPath(Key.INDEX.key());
-				if (indexNode.isInt())
-				{
-					if (activeWorkbook.getActiveSheetIndex() > -1)
-					{
-						activeWorkbook.removeSheetAt(indexNode.asInt());
-					}
-					else
-					{
-						addErrorMessage("sheet with " + Key.INDEX.key() + " " + indexNode.asInt() + " does not exist");
-					}
-				}
-				else if (indexNode.isMissingNode())
-				{
-					if (activeWorkbook.getNumberOfSheets() > 0)
-					{
-						if (activeWorkbook.getActiveSheetIndex() > -1)
-						{
-							activeWorkbook.removeSheetAt(activeWorkbook.getActiveSheetIndex());
-						}
-					}
-					else
-					{
-						addErrorMessage("there is no active sheet present");
-					}
-				}
-			}
-		}
+		return getResponse();
 	}
 	
-	public void getActiveSheet(ObjectNode requestNode, ObjectNode responseNode)
+	/**
+	 * Creates a workbook
+	 * 
+	 * @param workbook name
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String createWorkbook(String request)
 	{
-		if (workbookPresent())
+		if (createRequestNode(request))
 		{
-			Sheet sheet = activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex());
-			responseNode.put(Key.INDEX.key(), Objects.nonNull(sheet) ? activeWorkbook.getSheetIndex(sheet) : -1);
-			responseNode.put(Key.SHEET.key(), Objects.nonNull(sheet) ? sheet.getSheetName() : "");
+			doCreateWorkbook();
 		}
+		return getResponse();
+	}
+	
+	/**
+	 * Create a workbook with initial sheet
+	 * 
+	 * @param sheet name (optional)
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String createWorkbookWithSheet(String request)
+	{
+		if (createRequestNode(request))
+		{
+			if (doCreateWorkbook())
+			{
+				doCreateSheet();
+			}
+		}
+		return getResponse();
+	}
+	
+	/**
+	 * Drop sheet
+	 * 
+	 * @param sheet name (string) or index (integer)
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String dropSheet(String request)
+	{
+		if (createRequestNode(request))
+		{
+			if (workbookPresent())
+			{
+				doDropSheet();
+			}
+		}
+		return getResponse();
 	}
 	
 	/**
 	 * Returns an string array of all callable methods
 	 * 
-	 * @param requestNode  empty
+	 * @param getRequestNode()  empty
 	 * 
 	 * @return status 'OK' or 'Fehler'
 	 * @return methods string array of method names
 	 * @return optional errors containing error messages
 	 * 
 	 */
-	public void getCallableMethods(ObjectNode requestNode, ObjectNode responseNode)
+	public String getCallableMethods(String request)
 	{
-		ArrayNode callableMethods = responseNode.arrayNode();
+		ArrayNode callableMethods = getResponseNode().arrayNode();
 		Method[] methods = Xls.class.getDeclaredMethods();
 		for (Method method : methods)
 		{
-			if (Modifier.isPublic(method.getModifiers()))
+			if (Modifier.isPublic(method.getModifiers()) && Modifier.isStatic(method.getModifiers()))
 			{
-				if (method.getParameterCount() == 2)
+				Parameter[] parameters = method.getParameters();
+				if (parameters.length == 1 && parameters[0].getType().equals(String.class))
 				{
-					boolean result = true;
-					Parameter[] parameters = method.getParameters();
-					for (Parameter parameter : parameters)
-					{
-						if (parameter.getType().equals(ObjectNode.class))
-						{
-							result = false;
-							break;
-						}
-					}
-					if (result)
-					{
-						callableMethods.add(method.getName());
-					}
+					callableMethods.add(method.getName());
 				}
 			}
 		}
-		responseNode.set(Executor.RESULT, callableMethods);
+		getResponseNode().set(Executor.RESULT, callableMethods);
+		return getResponse();
 	}
-
-	public void sheetNames(ObjectNode requestNode, ObjectNode responseNode)
+	
+	public String getSupportedFunctionNames(String request)
 	{
-		if (workbookPresent())
-		{
-			ArrayNode sheetsNode = responseNode.arrayNode();
-			ArrayNode indexNode = responseNode.arrayNode();
-			int numberOfSheets = activeWorkbook.getNumberOfSheets();
-			for (int i = 0; i < numberOfSheets; i++)
-			{
-				sheetsNode.add(activeWorkbook.getSheetAt(i).getSheetName());
-				indexNode.add(i);
-			}
-			responseNode.set(Key.SHEET.key(), sheetsNode);
-			responseNode.set(Key.INDEX.key(), indexNode);
-		}
-	}
-
-	public void getSupportedFunctionNames(ObjectNode requestNode, ObjectNode responseNode)
-	{
-		ArrayNode arrayNode = responseNode.arrayNode();
+		ArrayNode arrayNode = getResponseNode().arrayNode();
 		Collection<String> supportedFunctionNames = FunctionEval.getSupportedFunctionNames();
 		for (String supportedFunctionName : supportedFunctionNames)
 		{
 			arrayNode.add(supportedFunctionName);
 		}
-		responseNode.set(Executor.RESULT, arrayNode);
-	}
-	
-	public void moveSheet(ObjectNode requestNode, ObjectNode responseNode)
-	{
-		boolean result = workbookPresent();
-		if (result)
-		{
-			Sheet sheet = activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex());
-			JsonNode sourceNode = requestNode.findPath(Key.SOURCE.key());
-			if (sourceNode.isTextual())
-			{
-				sheet = activeWorkbook.getSheet(sourceNode.asText());
-			}
-			else if (sourceNode.isInt())
-			{
-				sheet = activeWorkbook.getSheetAt(sourceNode.asInt());
-			}
-			else if (!sourceNode.isMissingNode())
-			{
-				result = addErrorMessage("illegal argument '" + Key.SOURCE.key() + "'");
-			}
-			if (result)
-			{
-				JsonNode targetNode = requestNode.findPath(Key.TARGET.key());
-				if (targetNode.isInt())
-				{
-					if (activeWorkbook.getNumberOfSheets() >= targetNode.asInt())
-					{
-						if (targetNode.asInt() < 0)
-						{
-							result = addErrorMessage("illegal argument '" + Key.TARGET.key() + "' (sheet index is out of range: " + targetNode.asInt() + ")");
-						}
-						
-						if (activeWorkbook.getActiveSheetIndex() != targetNode.asInt())
-						{
-							activeWorkbook.setSheetOrder(sheet.getSheetName(), targetNode.asInt());
-						}
-					}
-					else
-					{
-						result = addErrorMessage("illegal argument '" + Key.TARGET.key() + "' (sheet index is out of range: " + targetNode.asInt() + " > " + activeWorkbook.getNumberOfSheets() + ")");
-					}
-				}
-				else if (targetNode.isMissingNode())
-				{
-					result = addErrorMessage("missing argument '" + Key.TARGET.key() + "'");
-				}
-			}
-		}
+		getResponseNode().set(Executor.RESULT, arrayNode);
+		return getResponse();
 	}
 
-	public void releaseWorkbook(ObjectNode requestNode, ObjectNode responseNode)
+	/**
+	 * Rename existing sheet
+	 * 
+	 * @param index (integer)
+	 * @param sheet (string) new sheet name
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String moveSheet(String request)
 	{
-		activeWorkbook = null;
+		if (createRequestNode(request))
+		{
+			if (workbookPresent())
+			{
+				doMoveSheet();
+			}
+		}
+		return getResponse();
+	}
+	
+	/**
+	 * Release current workbook
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String releaseWorkbook(String request)
+	{
+		if (createRequestNode(request))
+		{
+			if (workbookPresent())
+			{
+				doReleaseWorkbook();
+			}
+		}
+		return getResponse();
 	}
 
-	public void renameSheet(ObjectNode requestNode, ObjectNode responseNode)
+	/**
+	 * Rename existing sheet
+	 * 
+	 * @param index (integer)
+	 * @param sheet (string) new sheet name
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String renameSheet(String request)
 	{
-		boolean result = workbookPresent();
-		if (result)
+		if (createRequestNode(request))
 		{
-			JsonNode sheetNode = requestNode.findPath(Key.SHEET.key());
-			if (sheetNode.isTextual())
+			if (workbookPresent())
 			{
-				int index = activeWorkbook.getActiveSheetIndex();
-				JsonNode indexNode = requestNode.findPath(Key.INDEX.key());
-				if (indexNode.isInt())
-				{
-					index = indexNode.asInt();
-				}
-				else if (!indexNode.isMissingNode())
-				{
-					result = addErrorMessage("illegal argument '" + Key.INDEX.key() + "'");
-				}
-				if (result)
-				{
-					activeWorkbook.setSheetName(index, sheetNode.asText());
-				}
-			}
-			else if (sheetNode.isMissingNode())
-			{
-				result = addErrorMessage("missing argument '" + Key.SHEET.key() + "'");
-			}
-			else
-			{
-				result = addErrorMessage("illegal argument '" + Key.SHEET.key() + "'");
+				doRenameSheet();
 			}
 		}
+		return getResponse();
 	}
 
-	public void rotateCells(ObjectNode requestNode, ObjectNode responseNode)
+	public String rotateCells(String request)
 	{
-		if (workbookPresent())
+		if (createRequestNode(request))
 		{
-			Sheet sheet = getSheet(requestNode);
-			if (Objects.nonNull(sheet))
+			if (workbookPresent())
 			{
-				CellRangeAddress cellRangeAddress = null;
-				JsonNode cellNode = requestNode.findPath(Key.CELL.key());
-				if (!cellNode.isMissingNode())
-				{
-					CellAddress cellAddress = getCellAddress(cellNode);
-					cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getColumn());
-				}
-				else
-				{
-					JsonNode rangeNode = requestNode.findPath(Key.RANGE.key());
-					cellRangeAddress = getCellRangeAddress(rangeNode);
-				}
-				if (Objects.nonNull(cellRangeAddress)) 
-				{
-					int rotation = Integer.MIN_VALUE;
-					JsonNode rotationNode = requestNode.findPath(Key.ROTATION.key());
-					if (rotationNode.isInt())
-					{
-						rotation = IntNode.class.cast(requestNode.get(Key.ROTATION.key())).asInt();
-					}
-					else if (rotationNode.isMissingNode())
-					{
-						addErrorMessage("missing argument '" + Key.ROTATION.key() + "'");
-					}
-					else
-					{
-						addErrorMessage("illegal argument '" + Key.ROTATION.key() + "'");
-					}
-					if (rotation != Integer.MIN_VALUE)
-					{
-						Iterator<CellAddress> cellAddresses = cellRangeAddress.iterator();
-						while (cellAddresses.hasNext())
-						{
-							CellAddress cellAddress = cellAddresses.next();
-							Row row = sheet.getRow(cellAddress.getRow());
-							if (Objects.nonNull(row))
-							{
-								Cell cell = row.getCell(cellAddress.getColumn());
-								if (Objects.nonNull(cell))
-								{
-									CellStyle cellStyle = sheet.getWorkbook().createCellStyle();
-									cellStyle.setRotation((short) rotation);
-									cell.setCellStyle(cellStyle);
-								}
-							}
-						}
-					}
-				}
+				doRotateCells();
 			}
 		}
+		return getResponse();
 	}
 	
-	public void saveAndReleaseWorkbook(ObjectNode requestNode, ObjectNode responseNode)
+	/**
+	 * Save and release current workbook
+	 * 
+	 * @param path where to save the workbook
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String saveAndReleaseWorkbook(String request)
 	{
-		if (workbookPresent())
+		if (createRequestNode(request))
 		{
-			if (doSaveWorkbook(requestNode, responseNode))
+			if (workbookPresent())
 			{
-				releaseWorkbook(requestNode, responseNode);
+				if (doSaveWorkbook())
+				{
+					doReleaseWorkbook();
+				}
 			}
 		}
+		return getResponse();
 	}
 	
-	public void saveWorkbook(ObjectNode requestNode, ObjectNode responseNode)
+	/**
+	 * Save current workbook
+	 * 
+	 * @param path where to save the workbook
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String saveWorkbook(String request)
 	{
-		if (workbookPresent())
+		if (createRequestNode(request))
 		{
-			doSaveWorkbook(requestNode, responseNode);
-		}
-	}
-	
-	public void setCells(ObjectNode requestNode, ObjectNode responseNode)
-	{
-		boolean result = workbookPresent();
-		if (result)
-		{
-			Sheet sheet = getSheet(requestNode);
-			result = Objects.nonNull(sheet);
-			if (result)
+			if (workbookPresent())
 			{
-				JsonNode cellNode = requestNode.findPath(Key.CELL.key());
-				JsonNode valuesNode = requestNode.findPath(Key.VALUES.key());
-				if (cellNode.isMissingNode())
-				{
-					result = addErrorMessage("missing argument '" + Key.CELL.key() + "'");
-				}
-				else if (valuesNode.isMissingNode())
-				{
-					result = addErrorMessage("missing argument '" + Key.VALUES.key() + "'");
-				}
-				else if (valuesNode.isArray())
-				{
-					ArrayNode valuesArrayNode = ArrayNode.class.cast(valuesNode);
-					if (cellNode.isArray())
-					{
-						if (cellNode.size() == valuesArrayNode.size())
-						{
-							result = doSetCells(sheet, ArrayNode.class.cast(cellNode), valuesArrayNode);
-						}
-						else
-						{
-							result = addErrorMessage("size of 'cell' array does not equal to size of 'values' array");
-						}
-					}
-					else
-					{
-						Direction direction = Direction.DEFAULT;
-						JsonNode directionNode = requestNode.findPath(Key.DIRECTION.key());
-						if (directionNode.isTextual())
-						{
-							try
-							{
-								direction = Direction.valueOf(directionNode.asText().toUpperCase());
-							}
-							catch (Exception e)
-							{
-								result = addErrorMessage("invalid argument 'direction'");
-							}
-						}
-						else if (directionNode.isMissingNode())
-						{
-						}
-						else
-						{
-							result = addErrorMessage("invalid argument 'direction'");
-						}
-						if (result)
-						{
-							if (cellNode.isTextual())
-							{
-								doSetCells(sheet, TextNode.class.cast(cellNode), valuesArrayNode, direction);
-							}
-							else if (cellNode.isObject())
-							{
-								doSetCells(sheet, ObjectNode.class.cast(cellNode), valuesArrayNode, direction);
-							}
-							else
-							{
-								result = addErrorMessage("invalid argument '" + Key.CELL.key() + "'");
-							}
-						}
-					}
-				}
-				else
-				{
-					result = addErrorMessage("invalid argument '" + Key.VALUES.key() + "'");
-				}
-			}
-			else
-			{
-				result = addErrorMessage("missing_argument '" + Key.SHEET.key() + "'");
+				doSaveWorkbook();
 			}
 		}
-	}
-	
-	public void setFooters(ObjectNode requestNode, ObjectNode responseNode)
-	{
-		if (workbookPresent())
-		{
-			Sheet sheet = getSheet(requestNode);
-			if (Objects.nonNull(sheet))
-			{
-				Footer footer = sheet.getFooter();
-				JsonNode leftNode = requestNode.findPath(Key.LEFT.key());
-				if (leftNode.isTextual())
-				{
-					footer.setLeft(leftNode.asText());
-					
-				}
-				JsonNode centerNode = requestNode.findPath(Key.CENTER.key());
-				if (centerNode.isTextual())
-				{
-					footer.setCenter(centerNode.asText());
-					
-				}
-				JsonNode rightNode = requestNode.findPath(Key.RIGHT.key());
-				if (rightNode.isTextual())
-				{
-					footer.setRight(rightNode.asText());
-				}
-			}
-		}
+		return getResponse();
 	}
 
-	public void setHeaders(ObjectNode requestNode, ObjectNode responseNode)
+	public String setCells(String request)
 	{
-		if (workbookPresent())
+		if (createRequestNode(request))
 		{
-			Sheet sheet = getSheet(requestNode);
-			if (Objects.nonNull(sheet))
+			if (workbookPresent())
 			{
-				Header header = sheet.getHeader();
-				JsonNode leftNode = requestNode.findPath(Key.LEFT.key());
-				if (leftNode.isTextual())
-				{
-					header.setLeft(leftNode.asText());
-	
-				}
-				JsonNode centerNode = requestNode.findPath(Key.CENTER.key());
-				if (centerNode.isTextual())
-				{
-					header.setCenter(centerNode.asText());
-	
-				}
-				JsonNode rightNode = requestNode.findPath(Key.RIGHT.key());
-				if (rightNode.isTextual())
-				{
-					header.setRight(rightNode.asText());
-				}
+				doSetCells();
 			}
 		}
-	}
-
-	public void setPrintSetup(ObjectNode requestNode, ObjectNode responseNode)
-	{
-		if (workbookPresent())
-		{
-			Sheet sheet = getSheet(requestNode);
-			if (Objects.nonNull(sheet))
-			{
-				JsonNode orientationNode = requestNode.findPath(Key.ORIENTATION.key());
-				if (!orientationNode.isMissingNode())
-				{
-					PrintOrientation orientation = PrintOrientation.DEFAULT;
-					if (orientationNode.isTextual())
-					{
-						try
-						{
-							orientation = PrintOrientation.valueOf(orientationNode.asText().toUpperCase());
-						}
-						catch (Exception e)
-						{
-							addErrorMessage("invalid argument 'orientation'");
-						}
-					}
-					switch (orientation)
-					{
-						case LANDSCAPE:
-						{
-							sheet.getPrintSetup().setLandscape(true);
-						}
-						case PORTRAIT:
-						{
-							sheet.getPrintSetup().setNoOrientation(false);
-							sheet.getPrintSetup().setLandscape(false);
-						}
-						default:
-						{
-							sheet.getPrintSetup().setNoOrientation(true);
-						}
-					}
-				}
-				int copies = 1;
-				JsonNode copiesNode = requestNode.findPath(Key.COPIES.key());
-				if (!copiesNode.isMissingNode())
-				{
-					if (copiesNode.isInt())
-					{
-						copies = copiesNode.asInt();
-					}
-					if (copies > 0 && copies <= Short.MAX_VALUE)
-					{
-						sheet.getPrintSetup().setCopies((short) copies);
-					}
-				}
-			}
-		}
-	}
-
-	public void workbookPresent(ObjectNode requestNode, ObjectNode responseNode)
-	{
-		responseNode.put(Executor.RESULT, Objects.nonNull(activeWorkbook) ? 1 : 0);
+		return getResponse();
 	}
 	
-	private boolean workbookPresent()
+	public String setFooters(String request)
 	{
-		boolean result = true;
-		if (Objects.isNull(activeWorkbook))
+		if (createRequestNode(request))
 		{
-			result = addErrorMessage("workbook missing (create workbook first)");
+			if (workbookPresent())
+			{
+				doSetFooters();
+			}
 		}
-		return result;
+		return getResponse();
+	}
+
+	public String setHeaders(String request)
+	{
+		if (createRequestNode(request))
+		{
+			if (workbookPresent())
+			{
+				doSetHeaders();
+			}
+		}
+		return getResponse();
+	}
+	
+	public String setPrintSetup(String request)
+	{
+		if (createRequestNode(request))
+		{
+			if (workbookPresent())
+			{
+				doSetPrintSetup();
+			}
+		}
+		return getResponse();
+	}
+
+	/**
+	 * Return list of sheet names by index order
+	 * 
+	 * @return status 'OK' or 'Fehler'
+	 * @return optional 'errors' array of error messages
+	 * 
+	 */
+	public String sheetNames(String request)
+	{
+		if (createRequestNode(request))
+		{
+			if (workbookPresent())
+			{
+				doGetSheetNames();
+			}
+		}
+		return getResponse();
+	}
+	
+	public String workbookPresent(String request)
+	{
+		if (createRequestNode(request))
+		{
+			getResponseNode().put(Executor.RESULT, Objects.nonNull(Xls.activeWorkbook) ? 1 : 0);
+		}
+		return getResponse();
 	}
 	
 	private void copyCell(Cell sourceCell, Cell targetCell)
@@ -1073,7 +527,7 @@ public class Xls extends Executor
 			}
 		}
 	}
-	
+
 	private String copyFormula(Sheet sheet, String formula, int rowDiff, int colDiff)
 	{
 		FormulaParsingWorkbook workbookWrapper = getFormulaParsingWorkbook(sheet);
@@ -1121,6 +575,729 @@ public class Xls extends Executor
 		return formula;
 	}
 	
+	private boolean doActivateSheet()
+	{
+		boolean result = true;
+		JsonNode sheetNode = getRequestNode().findPath(Key.SHEET.key());
+		if (sheetNode.isTextual())
+		{
+			Sheet sheet = activeWorkbook.getSheet(sheetNode.asText());
+			if (Objects.nonNull(sheet))
+			{
+				if (activeWorkbook.getActiveSheetIndex() != activeWorkbook.getSheetIndex(sheet))
+				{
+					activeWorkbook.setActiveSheet(activeWorkbook.getSheetIndex(sheet));
+				}
+			}
+			else
+			{
+				result = addErrorMessage("sheet with name '" + sheetNode.asText() + "' does not exist");
+			}
+		}
+		else if (sheetNode.isMissingNode())
+		{
+			JsonNode indexNode = getRequestNode().findPath(Key.INDEX.key());
+			if (indexNode.isInt())
+			{
+				if (activeWorkbook.getNumberOfSheets() > indexNode.asInt())
+				{
+					if (activeWorkbook.getActiveSheetIndex() != indexNode.asInt())
+					{
+						activeWorkbook.setActiveSheet(indexNode.asInt());
+					}
+				}
+				else
+				{
+					result = addErrorMessage("sheet with " + Key.INDEX.key() + " " + indexNode.asInt() + " does not exist");
+				}
+			}
+			else if (indexNode.isMissingNode())
+			{
+				result = addErrorMessage("missing argument '" + Key.SHEET.key() + "' or '" + Key.INDEX.key() + "'");
+			}
+			else
+			{
+				result = addErrorMessage("illegal argument '" + Key.INDEX.key() + "'");
+			}
+		}
+		else
+		{
+			result = addErrorMessage("illegal argument '" + Key.SHEET.key() + "'");
+		}
+		if (result)
+		{
+			getResponseNode().put(Key.INDEX.key(), activeWorkbook.getActiveSheetIndex());
+			getResponseNode().put(Key.SHEET.key(), activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex()).getSheetName());
+		}
+		return result;
+	}
+	
+	private boolean doActiveSheetPresent()
+	{
+		boolean result = true;
+		try
+		{
+			Sheet sheet = activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex());
+			result = Objects.nonNull(sheet);
+			getResponseNode().put(Key.INDEX.key(), result ? 1 : 0);
+			getResponseNode().put(Key.SHEET.key(), result ? sheet.getSheetName() : "");
+		}
+		catch (IllegalArgumentException e)
+		{
+			result = false;
+			getResponseNode().put(Key.INDEX.key(), 0);
+			getResponseNode().put(Key.SHEET.key(), "");
+		}
+		return result;
+	}
+	
+	private boolean doApplyCellStyles()
+	{
+		boolean result = true;
+		Sheet sheet = getSheet(getRequestNode());
+		if (Objects.nonNull(sheet))
+		{
+			CellRangeAddress cellRangeAddress = null;
+			JsonNode cellNode = getRequestNode().findPath(Key.CELL.key());
+			if (!cellNode.isMissingNode())
+			{
+				CellAddress cellAddress = getCellAddress(cellNode);
+				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getColumn());
+			}
+			else
+			{
+				JsonNode rangeNode = getRequestNode().findPath(Key.RANGE.key());
+				cellRangeAddress = getCellRangeAddress(rangeNode);
+			}
+			if (Objects.nonNull(cellRangeAddress))
+			{
+				Iterator<CellAddress> cellAddresses = cellRangeAddress.iterator();
+				while (cellAddresses.hasNext())
+				{
+					CellAddress cellAddress = cellAddresses.next();
+					Cell cell = getOrCreateCell(sheet, cellAddress);
+					if (Objects.nonNull(cell))
+					{
+						MergedCellStyle m = new MergedCellStyle(cell.getCellStyle());
+						result = m.applyRequestedStyles(getRequestNode(), getResponseNode());
+						if (result)
+						{
+							CellStyle cellStyle = getCellStyle(sheet, m);
+							cell.setCellStyle(cellStyle);
+						}
+						else
+						{
+							break;
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	private boolean doApplyFontStyles()
+	{
+		boolean result = true;
+		Sheet sheet = getSheet(getRequestNode());
+		if (Objects.nonNull(sheet))
+		{
+			CellRangeAddress cellRangeAddress = null;
+			JsonNode cellNode = getRequestNode().findPath(Key.CELL.key());
+			if (!cellNode.isMissingNode())
+			{
+				CellAddress cellAddress = getCellAddress(cellNode);
+				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getColumn());
+			}
+			else
+			{
+				JsonNode rangeNode = getRequestNode().findPath(Key.RANGE.key());
+				cellRangeAddress = getCellRangeAddress(rangeNode);
+			}
+			if (Objects.nonNull(cellRangeAddress))
+			{
+				Iterator<CellAddress> cellAddresses = cellRangeAddress.iterator();
+				while (cellAddresses.hasNext())
+				{
+					CellAddress cellAddress = cellAddresses.next();
+					Row row = sheet.getRow(cellAddress.getRow());
+					if (Objects.nonNull(row))
+					{
+						Cell cell = row.getCell(cellAddress.getColumn());
+						CellStyle cellStyle = cell.getCellStyle();
+						MergedCellStyle mcs = new MergedCellStyle(cellStyle);
+						int fontIndex = cellStyle.getFontIndex();
+						Font font = sheet.getWorkbook().getFontAt(fontIndex);
+						MergedFont m = new MergedFont(font);
+						if (m.applyRequestedFontStyles(getRequestNode(), getResponseNode()))
+						{
+							font = getFont(sheet, m);
+							if (font.getIndex() != fontIndex)
+							{
+								mcs.setFontIndex(font.getIndex());
+								cellStyle = getCellStyle(sheet, mcs);
+								cell.setCellStyle(cellStyle);
+							}
+						}
+						else
+						{
+							break;
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	private boolean doAutoSizeColumns()
+	{
+		boolean result = true;
+		Sheet sheet = getSheet(getRequestNode());
+		if (Objects.nonNull(sheet))
+		{
+			CellRangeAddress cellRangeAddress = null;
+			JsonNode cellNode = getRequestNode().findPath(Key.CELL.key());
+			if (cellNode.isMissingNode())
+			{
+				JsonNode rangeNode = getRequestNode().findPath(Key.RANGE.key());
+				if (!rangeNode.isMissingNode())
+				{
+					cellRangeAddress = getCellRangeAddress(rangeNode);
+				}
+			}
+			else
+			{
+				CellAddress cellAddress = getCellAddress(cellNode);
+				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getRow(), cellAddress.getColumn());
+			}
+			if (Objects.nonNull(cellRangeAddress))
+			{
+				int leftCol = cellRangeAddress.getFirstColumn();
+				int rightCol = cellRangeAddress.getLastColumn();
+				for (int colIndex = leftCol; colIndex <= rightCol; colIndex++)
+				{
+					sheet.autoSizeColumn(colIndex);
+				}
+			}
+		}
+		return result;
+	}
+	
+	private boolean doCopyCells()
+	{
+		boolean result = true;
+		Sheet sourceSheet = getSheet(getRequestNode());
+		Sheet targetSheet = sourceSheet;
+		CellRangeAddress sourceCellRangeAddress = null;
+		CellRangeAddress targetCellRangeAddress = null;
+		JsonNode sourceNode = getRequestNode().findPath(Key.SOURCE.key());
+		if (sourceNode.isTextual())
+		{
+			sourceCellRangeAddress = getCellRangeAddress(sourceNode);
+			if (Objects.nonNull(sourceCellRangeAddress))
+			{
+				JsonNode targetNode = getRequestNode().findPath(Key.TARGET.key());
+				if (targetNode.isTextual())
+				{
+					targetCellRangeAddress = getCellRangeAddress(targetNode);
+					if (Objects.isNull(targetCellRangeAddress))
+					{
+						result = addErrorMessage("illegal argument '" + targetNode.asText() + "'");
+					}
+				}
+				else if (targetNode.isObject())
+				{
+					targetSheet = getSheet(ObjectNode.class.cast(targetNode));
+					targetCellRangeAddress = getCellRangeAddress(targetNode);
+				}
+				else
+				{
+					result = addErrorMessage("illegal argument '" + Key.TARGET.key() + "'");
+				}
+			}
+			else
+			{
+				result = addErrorMessage("illegal argument '" + sourceNode.asText() + "'");
+			}
+		}
+		else if (sourceNode.isObject())
+		{
+			sourceSheet = getSheet(ObjectNode.class.cast(sourceNode));
+			sourceCellRangeAddress = getCellRangeAddress(sourceNode);
+			JsonNode targetNode = getRequestNode().findPath(Key.TARGET.key());
+			if (targetNode.isTextual())
+			{
+				targetCellRangeAddress = getCellRangeAddress(targetNode);
+				if (Objects.isNull(targetCellRangeAddress))
+				{
+					result = addErrorMessage("illegal argument '" + targetNode.asText() + "'");
+				}
+			}
+			else if (targetNode.isObject())
+			{
+				targetSheet = getSheet(ObjectNode.class.cast(targetNode));
+				targetCellRangeAddress = getCellRangeAddress(targetNode);
+			}
+			else
+			{
+				result = addErrorMessage("illegal argument '" + Key.TARGET.key() + "'");
+			}
+		}
+		else
+		{
+			result = addErrorMessage("illegal argument '" + Key.SOURCE.key() + "'");
+		}
+		if (Objects.nonNull(sourceCellRangeAddress) && Objects.nonNull(targetCellRangeAddress))
+		{
+			if (sourceSheet == targetSheet)
+			{
+				if (sourceCellRangeAddress.intersects(targetCellRangeAddress))
+				{
+					result = addErrorMessage("source range and target range must not intersect");
+				}
+			}
+			if (result)
+			{
+				if (sourceCellRangeAddress.getNumberOfCells() == 1)
+				{
+					Row sourceRow = sourceSheet.getRow(sourceCellRangeAddress.getFirstRow());
+					if (Objects.nonNull(sourceRow))
+					{
+						Cell sourceCell = sourceRow.getCell(sourceCellRangeAddress.getFirstColumn());
+						if (Objects.nonNull(sourceCell))
+						{
+							Iterator<CellAddress> targetAddresses = targetCellRangeAddress.iterator();
+							while (targetAddresses.hasNext())
+							{
+								CellAddress sourceAddress = new CellAddress(sourceCell);
+								CellAddress targetAddress = targetAddresses.next();
+								int rowDiff = targetAddress.getRow() - sourceAddress.getRow();
+								int colDiff = targetAddress.getColumn() - sourceAddress.getColumn();
+								if (sourceCell.getCellType().equals(CellType.FORMULA))
+								{
+									String copiedFormula = copyFormula(sourceSheet, sourceCell.getCellFormula(),
+											rowDiff, colDiff);
+									Cell targetCell = getOrCreateCell(targetSheet, targetAddress);
+									targetCell.setCellFormula(copiedFormula);
+								}
+								else
+								{
+									int targetTop = targetCellRangeAddress.getFirstRow();
+									int targetBottom = targetCellRangeAddress.getLastRow();
+									int targetLeft = targetCellRangeAddress.getFirstColumn();
+									int targetRight = targetCellRangeAddress.getLastColumn();
+									for (int r = targetTop; r <= targetBottom; r++)
+									{
+										Row targetRow = getOrCreateRow(targetSheet, r);
+										for (int cell = targetLeft; cell <= targetRight; cell++)
+										{
+											Cell targetCell = getOrCreateCell(targetRow, cell);
+											if (sourceCell.getCellType().equals(CellType.STRING))
+											{
+												targetCell.setCellValue(sourceCell.getRichStringCellValue());
+
+											}
+											else if (sourceCell.getCellType().equals(CellType.NUMERIC))
+											{
+												targetCell.setCellValue(sourceCell.getNumericCellValue());
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (sourceCellRangeAddress.getNumberOfCells() == targetCellRangeAddress.getNumberOfCells()
+						&& sourceCellRangeAddress.getLastRow()
+								- sourceCellRangeAddress.getFirstRow() == targetCellRangeAddress.getLastRow()
+										- targetCellRangeAddress.getFirstRow())
+				{
+					Iterator<CellAddress> sourceAddresses = sourceCellRangeAddress.iterator();
+					Iterator<CellAddress> targetAddresses = targetCellRangeAddress.iterator();
+					while (sourceAddresses.hasNext())
+					{
+						CellAddress sourceAddress = sourceAddresses.next();
+						Row sourceRow = sourceSheet.getRow(sourceAddress.getRow());
+						if (Objects.nonNull(sourceRow))
+						{
+							Cell sourceCell = sourceRow.getCell(sourceAddress.getColumn());
+							if (Objects.nonNull(sourceCell))
+							{
+								CellAddress targetAddress = targetAddresses.next();
+								Row targetRow = getOrCreateRow(targetSheet, targetAddress.getRow());
+								Cell targetCell = getOrCreateCell(targetRow, targetAddress.getColumn());
+								copyCell(sourceCell, targetCell);
+							}
+						}
+					}
+				}
+				else
+				{
+					result = addErrorMessage("source and target range dimensions must not differ");
+				}
+			}
+			else
+			{
+				result = addErrorMessage("missing argument 'sheet' for source");
+			}
+		}
+		else
+		{
+			result = addErrorMessage("missing argument 'target'");
+		}
+		return result;
+	}
+	
+	private boolean doCreateSheet()
+	{
+		boolean result = true;
+		Sheet sheet = null;
+		JsonNode sheetNode = getRequestNode().findPath(Key.SHEET.key());
+		if (sheetNode.isMissingNode())
+		{
+			sheet = activeWorkbook.createSheet();
+		}
+		else if (sheetNode.isTextual())
+		{
+			try
+			{
+				sheet = activeWorkbook.createSheet(sheetNode.asText());
+			}
+			catch (IllegalArgumentException e)
+			{
+				result = addErrorMessage("illegal argument 'sheet' ('" + sheetNode.asText() + "' already exists)");
+			}
+		}
+		if (result)
+		{
+			getResponseNode().put(Key.SHEET.key(), sheet.getSheetName());
+			getResponseNode().put(Key.INDEX.key(), activeWorkbook.getSheetIndex(sheet));
+		}
+		return result;
+	}
+
+	private boolean doCreateWorkbook()
+	{
+		boolean result = true;
+		Type type = null;
+		JsonNode typeNode = getRequestNode().findPath(Key.TYPE.key());
+		if (typeNode.isTextual())
+		{
+			type = Type.findByExtension(typeNode.asText());
+		}
+		else if (typeNode.isMissingNode())
+		{
+			type = Type.XLSX;
+		}
+		if (Objects.nonNull(type))
+		{
+			switch (type)
+			{
+				case XLSX:
+				{
+					activeWorkbook = new XSSFWorkbook();
+				}
+				case XLS:
+				{
+					activeWorkbook = new HSSFWorkbook();
+				}
+			}
+		}
+		else
+		{
+			result = addErrorMessage("illegal extension '" + typeNode.asText() + "'");
+		}
+		return result;
+	}
+
+	private boolean doDropSheet()
+	{
+		boolean result = true;
+		JsonNode sheetNode = getRequestNode().findPath(Key.SHEET.key());
+		if (sheetNode.isTextual())
+		{
+			Sheet sheet = activeWorkbook.getSheet(sheetNode.asText());
+			if (Objects.nonNull(sheet))
+			{
+				activeWorkbook.removeSheetAt(activeWorkbook.getSheetIndex(sheet));
+			}
+			else
+			{
+				result = addErrorMessage("sheet with name '" + sheetNode.asText() + "' does not exist");
+			}
+		}
+		else if (sheetNode.isMissingNode())
+		{
+			JsonNode indexNode = getRequestNode().findPath(Key.INDEX.key());
+			if (indexNode.isInt())
+			{
+				if (activeWorkbook.getActiveSheetIndex() > -1)
+				{
+					activeWorkbook.removeSheetAt(indexNode.asInt());
+				}
+				else
+				{
+					result = addErrorMessage("sheet with " + Key.INDEX.key() + " " + indexNode.asInt() + " does not exist");
+				}
+			}
+			else if (indexNode.isMissingNode())
+			{
+				if (activeWorkbook.getNumberOfSheets() > 0)
+				{
+					if (activeWorkbook.getActiveSheetIndex() > -1)
+					{
+						activeWorkbook.removeSheetAt(activeWorkbook.getActiveSheetIndex());
+					}
+				}
+				else
+				{
+					result = addErrorMessage("there is no active sheet present");
+				}
+			}
+		}
+		return result;
+	}
+	
+	private boolean doGetActiveSheet()
+	{
+		boolean result = true;
+		Sheet sheet = activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex());
+		if (Objects.nonNull(sheet))
+		{
+			getResponseNode().put(Key.INDEX.key(), activeWorkbook.getSheetIndex(sheet));
+			getResponseNode().put(Key.SHEET.key(), sheet.getSheetName());
+		}
+		else
+		{
+			result = addErrorMessage("there is no active sheet present");
+		}
+		return result;
+	}
+
+	private boolean doGetSheetNames()
+	{
+		boolean result = true;
+		ArrayNode sheetsNode = getResponseNode().arrayNode();
+		ArrayNode indexNode = getResponseNode().arrayNode();
+		int numberOfSheets = activeWorkbook.getNumberOfSheets();
+		for (int i = 0; i < numberOfSheets; i++)
+		{
+			sheetsNode.add(activeWorkbook.getSheetAt(i).getSheetName());
+			indexNode.add(i);
+		}
+		getResponseNode().set(Key.SHEET.key(), sheetsNode);
+		getResponseNode().set(Key.INDEX.key(), indexNode);
+		return result;
+	}
+
+	private boolean doMoveSheet()
+	{
+		boolean result = true;
+		Sheet sheet = activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex());
+		JsonNode sourceNode = getRequestNode().findPath(Key.SOURCE.key());
+		if (sourceNode.isTextual())
+		{
+			sheet = activeWorkbook.getSheet(sourceNode.asText());
+		}
+		else if (sourceNode.isInt())
+		{
+			sheet = activeWorkbook.getSheetAt(sourceNode.asInt());
+		}
+		else if (!sourceNode.isMissingNode())
+		{
+			result = addErrorMessage("illegal argument '" + Key.SOURCE.key() + "'");
+		}
+		if (result)
+		{
+			JsonNode targetNode = getRequestNode().findPath(Key.TARGET.key());
+			if (targetNode.isInt())
+			{
+				if (activeWorkbook.getNumberOfSheets() >= targetNode.asInt())
+				{
+					if (targetNode.asInt() < 0)
+					{
+						result = addErrorMessage("illegal argument '" + Key.TARGET.key() + "' (sheet index is out of range: " + targetNode.asInt() + ")");
+					}
+						
+					if (activeWorkbook.getActiveSheetIndex() != targetNode.asInt())
+					{
+						activeWorkbook.setSheetOrder(sheet.getSheetName(), targetNode.asInt());
+					}
+				}
+				else
+				{
+					result = addErrorMessage("illegal argument '" + Key.TARGET.key() + "' (sheet index is out of range: " + targetNode.asInt() + " > " + activeWorkbook.getNumberOfSheets() + ")");
+				}
+			}
+			else if (targetNode.isMissingNode())
+			{
+				result = addErrorMessage("missing argument '" + Key.TARGET.key() + "'");
+			}
+		}
+		return result;
+	}
+
+	private boolean doReleaseWorkbook()
+	{
+		activeWorkbook = null;
+		return true;
+	}
+	
+	private boolean doRenameSheet()
+	{
+		boolean result = true;
+		JsonNode sheetNode = getRequestNode().findPath(Key.SHEET.key());
+		if (sheetNode.isTextual())
+		{
+			int index = activeWorkbook.getActiveSheetIndex();
+			JsonNode indexNode = getRequestNode().findPath(Key.INDEX.key());
+			if (indexNode.isInt())
+			{
+				index = indexNode.asInt();
+			}
+			else if (!indexNode.isMissingNode())
+			{
+				result = addErrorMessage("illegal argument '" + Key.INDEX.key() + "'");
+			}
+			if (result)
+			{
+				activeWorkbook.setSheetName(index, sheetNode.asText());
+			}
+		}
+		else if (sheetNode.isMissingNode())
+		{
+			result = addErrorMessage("missing argument '" + Key.SHEET.key() + "'");
+		}
+		else
+		{
+			result = addErrorMessage("illegal argument '" + Key.SHEET.key() + "'");
+		}
+		return result;
+	}
+	
+	private boolean doRotateCells()
+	{
+		boolean result = true;
+		Sheet sheet = getSheet(getRequestNode());
+		if (Objects.nonNull(sheet))
+		{
+			CellRangeAddress cellRangeAddress = null;
+			JsonNode cellNode = getRequestNode().findPath(Key.CELL.key());
+			if (!cellNode.isMissingNode())
+			{
+				CellAddress cellAddress = getCellAddress(cellNode);
+				cellRangeAddress = new CellRangeAddress(cellAddress.getRow(), cellAddress.getRow(), cellAddress.getColumn(), cellAddress.getColumn());
+			}
+			else
+			{
+				JsonNode rangeNode = getRequestNode().findPath(Key.RANGE.key());
+				cellRangeAddress = getCellRangeAddress(rangeNode);
+			}
+			if (Objects.nonNull(cellRangeAddress)) 
+			{
+				int rotation = Integer.MIN_VALUE;
+				JsonNode rotationNode = getRequestNode().findPath(Key.ROTATION.key());
+				if (rotationNode.isInt())
+				{
+					rotation = IntNode.class.cast(getRequestNode().get(Key.ROTATION.key())).asInt();
+				}
+				else if (rotationNode.isMissingNode())
+				{
+					result = addErrorMessage("missing argument '" + Key.ROTATION.key() + "'");
+				}
+				else
+				{
+					result = addErrorMessage("illegal argument '" + Key.ROTATION.key() + "'");
+				}
+				if (rotation != Integer.MIN_VALUE)
+				{
+					Iterator<CellAddress> cellAddresses = cellRangeAddress.iterator();
+					while (cellAddresses.hasNext())
+					{
+						CellAddress cellAddress = cellAddresses.next();
+						Row row = sheet.getRow(cellAddress.getRow());
+						if (Objects.nonNull(row))
+						{
+							Cell cell = row.getCell(cellAddress.getColumn());
+							if (Objects.nonNull(cell))
+							{
+								CellStyle cellStyle = sheet.getWorkbook().createCellStyle();
+								cellStyle.setRotation((short) rotation);
+								cell.setCellStyle(cellStyle);
+							}
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+	
+	private boolean doSaveWorkbook()
+	{
+		boolean result = true;
+		JsonNode pathNode = getRequestNode().findPath(Key.PATH.key());
+		if (pathNode.isTextual())
+		{
+			File file = new File(pathNode.asText());
+			OutputStream os = null;
+			try
+			{
+				file.getCanonicalPath();
+				if (!file.getName().endsWith(".xlsx") && !file.getName().endsWith(".xls"))
+				{
+					if (XSSFWorkbook.class.isInstance(activeWorkbook))
+					{
+						file = new File(file.getAbsolutePath() + ".xlsx");
+					}
+					else if (HSSFWorkbook.class.isInstance(activeWorkbook))
+					{
+						file = new File(file.getAbsolutePath() + ".xls");
+					}
+				}
+				os = new FileOutputStream(file);
+				activeWorkbook.write(os);
+			}
+			catch (Exception e)
+			{
+				result = addErrorMessage("saving workbook failed (" + e.getLocalizedMessage() + ")");
+			}
+			finally
+			{
+				if (Objects.nonNull(os))
+				{
+					try
+					{
+						os.flush();
+						os.close();
+					}
+					catch (Exception e)
+					{
+					}
+				}
+			}
+		}
+		else if (pathNode.isMissingNode())
+		{
+			result = addErrorMessage("missing argument '" + Key.PATH.key() + "'");
+		}
+		else
+		{
+			result = addErrorMessage("illegal argument '" + Key.PATH.key() + "'");
+		}
+		return result;
+	}
+
 	private boolean doSetCell(Sheet sheet, CellAddress cellAddress, JsonNode valueNode)
 	{
 		boolean result = true;
@@ -1196,78 +1373,89 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-	
-	private boolean doSaveWorkbook(ObjectNode requestNode, ObjectNode responseNode)
+
+	private boolean doSetCells()
 	{
-		boolean result = workbookPresent();
+		boolean result = true;
+		Sheet sheet = getSheet(getRequestNode());
+		result = Objects.nonNull(sheet);
 		if (result)
 		{
-			JsonNode pathNode = requestNode.findPath(Key.PATH.key());
-			if (pathNode.isTextual())
+			JsonNode cellNode = getRequestNode().findPath(Key.CELL.key());
+			JsonNode valuesNode = getRequestNode().findPath(Key.VALUES.key());
+			if (cellNode.isMissingNode())
 			{
-				File file = new File(pathNode.asText());
-				OutputStream os = null;
-				try
+				result = addErrorMessage("missing argument '" + Key.CELL.key() + "'");
+			}
+			else if (valuesNode.isMissingNode())
+			{
+				result = addErrorMessage("missing argument '" + Key.VALUES.key() + "'");
+			}
+			else if (valuesNode.isArray())
+			{
+				ArrayNode valuesArrayNode = ArrayNode.class.cast(valuesNode);
+				if (cellNode.isArray())
 				{
-					file.getCanonicalPath();
-					if (!file.getName().endsWith(".xlsx") && !file.getName().endsWith(".xls"))
+					if (cellNode.size() == valuesArrayNode.size())
 					{
-						if (XSSFWorkbook.class.isInstance(activeWorkbook))
-						{
-							file = new File(file.getAbsolutePath() + ".xlsx");
-						}
-						else if (HSSFWorkbook.class.isInstance(activeWorkbook))
-						{
-							file = new File(file.getAbsolutePath() + ".xls");
-						}
+						result = setCells(sheet, ArrayNode.class.cast(cellNode), valuesArrayNode);
 					}
-					os = new FileOutputStream(file);
-					activeWorkbook.write(os);
+					else
+					{
+						result = addErrorMessage("size of 'cell' array does not equal to size of 'values' array");
+					}
 				}
-				catch (Exception e)
+				else
 				{
-					result = addErrorMessage("saving workbook failed (" + e.getLocalizedMessage() + ")");
-				}
-				finally
-				{
-					if (Objects.nonNull(os))
+					Direction direction = Direction.DEFAULT;
+					JsonNode directionNode = getRequestNode().findPath(Key.DIRECTION.key());
+					if (directionNode.isTextual())
 					{
 						try
 						{
-							os.flush();
-							os.close();
+							direction = Direction.valueOf(directionNode.asText().toUpperCase());
 						}
 						catch (Exception e)
 						{
+							result = addErrorMessage("invalid argument 'direction'");
+						}
+					}
+					else if (directionNode.isMissingNode())
+					{
+					}
+					else
+					{
+						result = addErrorMessage("invalid argument 'direction'");
+					}
+					if (result)
+					{
+						if (cellNode.isTextual())
+						{
+							doSetCells(sheet, TextNode.class.cast(cellNode), valuesArrayNode, direction);
+						}
+						else if (cellNode.isObject())
+						{
+							doSetCells(sheet, ObjectNode.class.cast(cellNode), valuesArrayNode, direction);
+						}
+						else
+						{
+							result = addErrorMessage("invalid argument '" + Key.CELL.key() + "'");
 						}
 					}
 				}
 			}
-			else if (pathNode.isMissingNode())
-			{
-				result = addErrorMessage("missing argument '" + Key.PATH.key() + "'");
-			}
 			else
 			{
-				result = addErrorMessage("illegal argument '" + Key.PATH.key() + "'");
+				result = addErrorMessage("invalid argument '" + Key.VALUES.key() + "'");
 			}
 		}
-		return result;
-	}
-	
-	private boolean doSetCells(Sheet sheet, ArrayNode cellNode, ArrayNode valuesNode)
-	{
-		boolean result = true;
-		for (int i = 0; i < cellNode.size(); i++)
+		else
 		{
-			CellAddress cellAddress = getCellAddress(cellNode.get(i), Key.CELL.key());
-			JsonNode valueNode = valuesNode.get(i);
-			result = doSetCell(sheet, cellAddress, valueNode);
-
+			result = addErrorMessage("missing_argument '" + Key.SHEET.key() + "'");
 		}
 		return result;
 	}
-	
+
 	private boolean doSetCells(Sheet sheet, CellAddress cellAddress, ArrayNode valuesNode, Direction direction)
 	{
 		boolean result = Objects.nonNull(cellAddress);
@@ -1275,7 +1463,7 @@ public class Xls extends Executor
 		{
 			if (valuesNode.size() > 0)
 			{
-				if (direction.validRange(responseNode, sheet.getWorkbook(), cellAddress, valuesNode.size()))
+				if (direction.validRange(getResponseNode(), sheet.getWorkbook(), cellAddress, valuesNode.size()))
 				{
 					for (int i = 0; i < valuesNode.size(); i++)
 					{
@@ -1299,7 +1487,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-
+	
 	private boolean doSetCells(Sheet sheet, ObjectNode cellNode, ArrayNode valuesNode, Direction direction)
 	{
 		boolean result = true;
@@ -1314,7 +1502,7 @@ public class Xls extends Executor
 		}
 		return result;
 	}
-
+	
 	private boolean doSetCells(Sheet sheet, TextNode cellNode, ArrayNode valuesNode, Direction direction)
 	{
 		boolean result = true;
@@ -1326,6 +1514,117 @@ public class Xls extends Executor
 		catch (Exception e)
 		{
 			result = addErrorMessage("invalid argument '" + cellNode.asText() + "'");
+		}
+		return result;
+	}
+	
+	private boolean doSetFooters()
+	{
+		boolean result = true;
+		Sheet sheet = getSheet(getRequestNode());
+		if (Objects.nonNull(sheet))
+		{
+			Footer footer = sheet.getFooter();
+			JsonNode leftNode = getRequestNode().findPath(Key.LEFT.key());
+			if (leftNode.isTextual())
+			{
+				footer.setLeft(leftNode.asText());
+
+			}
+			JsonNode centerNode = getRequestNode().findPath(Key.CENTER.key());
+			if (centerNode.isTextual())
+			{
+				footer.setCenter(centerNode.asText());
+
+			}
+			JsonNode rightNode = getRequestNode().findPath(Key.RIGHT.key());
+			if (rightNode.isTextual())
+			{
+				footer.setRight(rightNode.asText());
+			}
+		}
+		return result;
+	}
+	
+	private boolean doSetHeaders()
+	{
+		boolean result = true;
+		Sheet sheet = getSheet(getRequestNode());
+		if (Objects.nonNull(sheet))
+		{
+			Header header = sheet.getHeader();
+			JsonNode leftNode = getRequestNode().findPath(Key.LEFT.key());
+			if (leftNode.isTextual())
+			{
+				header.setLeft(leftNode.asText());
+
+			}
+			JsonNode centerNode = getRequestNode().findPath(Key.CENTER.key());
+			if (centerNode.isTextual())
+			{
+				header.setCenter(centerNode.asText());
+
+			}
+			JsonNode rightNode = getRequestNode().findPath(Key.RIGHT.key());
+			if (rightNode.isTextual())
+			{
+				header.setRight(rightNode.asText());
+			}
+		}
+		return result;
+	}
+	
+	private boolean doSetPrintSetup()
+	{
+		boolean result = true;
+		Sheet sheet = getSheet(getRequestNode());
+		if (Objects.nonNull(sheet))
+		{
+			JsonNode orientationNode = getRequestNode().findPath(Key.ORIENTATION.key());
+			if (!orientationNode.isMissingNode())
+			{
+				PrintOrientation orientation = PrintOrientation.DEFAULT;
+				if (orientationNode.isTextual())
+				{
+					try
+					{
+						orientation = PrintOrientation.valueOf(orientationNode.asText().toUpperCase());
+					}
+					catch (Exception e)
+					{
+						result = addErrorMessage("invalid argument 'orientation'");
+					}
+				}
+				switch (orientation)
+				{
+					case LANDSCAPE:
+					{
+						sheet.getPrintSetup().setLandscape(true);
+					}
+					case PORTRAIT:
+					{
+						sheet.getPrintSetup().setNoOrientation(false);
+						sheet.getPrintSetup().setLandscape(false);
+					}
+					default:
+					{
+						sheet.getPrintSetup().setNoOrientation(true);
+					}
+				}
+			}
+			int copies = 1;
+			JsonNode copiesNode = getRequestNode().findPath(Key.COPIES.key());
+			if (!copiesNode.isMissingNode())
+			{
+				if (copiesNode.isInt())
+				{
+					copies = copiesNode.asInt();
+				}
+				if (copies > 0 && copies <= Short.MAX_VALUE)
+				{
+					sheet.getPrintSetup().setCopies((short) copies);
+				}
+			}
 		}
 		return result;
 	}
@@ -1587,7 +1886,7 @@ public class Xls extends Executor
 		}
 		return font;
 	}
-	
+
 	private FormulaParsingWorkbook getFormulaParsingWorkbook(Sheet sheet)
 	{
 		FormulaParsingWorkbook workbookWrapper = null;
@@ -1615,7 +1914,7 @@ public class Xls extends Executor
 		}
 		return workbookWrapper;
 	}
-
+	
 	private Cell getOrCreateCell(Row row, int colIndex)
 	{
 		Cell cell = null;
@@ -1650,7 +1949,7 @@ public class Xls extends Executor
 		}
 		return cell;
 	}
-	
+
 	private Row getOrCreateRow(Sheet sheet, int rowIndex)
 	{
 		Row row = null;
@@ -1675,10 +1974,10 @@ public class Xls extends Executor
 		try
 		{
 			sheet = activeWorkbook.getSheetAt(activeWorkbook.getActiveSheetIndex());
-			JsonNode sheetNode = requestNode.findPath(Key.SHEET.key());
+			JsonNode sheetNode = getRequestNode().findPath(Key.SHEET.key());
 			if (sheetNode.isMissingNode())
 			{
-				JsonNode indexNode = requestNode.findPath(Key.INDEX.key());
+				JsonNode indexNode = getRequestNode().findPath(Key.INDEX.key());
 				if (indexNode.isInt())
 				{
 					sheet = activeWorkbook.getSheetAt(indexNode.asInt());
@@ -1713,6 +2012,19 @@ public class Xls extends Executor
 		return sheet;
 	}
 	
+	private boolean setCells(Sheet sheet, ArrayNode cellNode, ArrayNode valuesNode)
+	{
+		boolean result = true;
+		for (int i = 0; i < cellNode.size(); i++)
+		{
+			CellAddress cellAddress = getCellAddress(cellNode.get(i), Key.CELL.key());
+			JsonNode valueNode = valuesNode.get(i);
+			result = doSetCell(sheet, cellAddress, valueNode);
+
+		}
+		return result;
+	}
+
 	private void setRichTextString(Cell cell, String value)
 	{
 		if (XSSFCell.class.isInstance(cell))
@@ -1734,4 +2046,27 @@ public class Xls extends Executor
 	{
 		return rowIndex > -1 && rowIndex < activeWorkbook.getSpreadsheetVersion().getMaxRows();
 	}
+	
+	private boolean workbookPresent()
+	{
+		boolean result = true;
+		if (Objects.isNull(activeWorkbook))
+		{
+			result = addErrorMessage("workbook missing (create workbook first)");
+		}
+		return result;
+	}
+
+//	private boolean isFunctionSupported(String function)
+//	{
+//		int pos = function.indexOf("(");
+//		if (pos > -1)
+//		{
+//			String name = function.substring(0, pos - 1);
+//			FunctionNameEval functionEval = new FunctionNameEval(name);
+//			System.out.println(functionEval);
+//		}
+//		return true;
+//	}
+
 }

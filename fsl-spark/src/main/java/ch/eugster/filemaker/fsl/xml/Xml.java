@@ -13,7 +13,6 @@ import org.json.XML;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ch.eugster.filemaker.fsl.Executor;
 
@@ -21,59 +20,72 @@ public class Xml extends Executor
 {
 //	private static Logger logger = LoggerFactory.getLogger(Camt.class);
 
-	public void convert(ObjectNode requestNode, ObjectNode responseNode)
+	public static final String IDENTIFIER_KEY = "identifier";
+	
+	public String convert(String request)
 	{
-		JsonNode xmlFileNode = requestNode.findPath(Key.XML_FILE.key());
+		if (createRequestNode(request))
+		{
+			doConvert();
+		}
+		return getResponse();
+	}
+	
+	private boolean doConvert()
+	{
+		boolean result = true;
+		JsonNode xmlFileNode = getRequestNode().findPath(Key.XML_FILE.key());
 		if (xmlFileNode.isTextual())
 		{
 			File file = new File(xmlFileNode.asText());
 			if (file.isFile())
 			{
-				readXmlFileAndConvertToJson(file);
+				result = readXmlFileAndConvertToJson(file);
 			}
 			else
 			{
-				addErrorMessage("'" + file.getName()+ "' is not a valid xml file");
+				result = addErrorMessage("'" + file.getName()+ "' is not a valid xml file");
 			}
 		}
 		else if (xmlFileNode.isMissingNode())
 		{
-			JsonNode jsonFileNode = requestNode.findPath(Key.JSON_FILE.key());
+			JsonNode jsonFileNode = getRequestNode().findPath(Key.JSON_FILE.key());
 			if (jsonFileNode.isTextual())
 			{
 				File file = new File(jsonFileNode.asText());
 				if (file.isFile())
 				{
-					readJsonFileAndConvertToXml(file);
+					result = readJsonFileAndConvertToXml(file);
 				}
 				else
 				{
-					addErrorMessage("'" + file.getName()+ "' is not a valid json file");
+					result = addErrorMessage("'" + file.getName()+ "' is not a valid json file");
 				}
 			}
 			else if (jsonFileNode.isMissingNode())
 			{
-				JsonNode xmlContentNode = requestNode.findPath(Key.XML_CONTENT.key());
+				JsonNode xmlContentNode = getRequestNode().findPath(Key.XML_CONTENT.key());
 				if (xmlContentNode.isTextual())
 				{
 					String xml = xmlContentNode.asText();
-					convertXmlToJson(xml);
+					result = convertXmlToJson(xml);
 				}
 				else if (xmlContentNode.isMissingNode())
 				{
-					JsonNode jsonContentNode = requestNode.findPath(Key.JSON_CONTENT.key());
+					JsonNode jsonContentNode = getRequestNode().findPath(Key.JSON_CONTENT.key());
 					if (jsonContentNode.isTextual())
 					{
 						String json = jsonContentNode.asText();
-						convertJsonToXml(json);
+						result = convertJsonToXml(json);
 					}
 					else if (jsonContentNode.isMissingNode())
 					{
-						addErrorMessage("missing argument, one of '" + Key.XML_FILE.key() + "', '" + Key.XML_CONTENT.key() + "', " + Key.JSON_FILE.key() + "', or '" + Key.JSON_CONTENT.key() + "'");
+						result = addErrorMessage("missing argument, one of '" + Key.XML_FILE.key() + "', '" + Key.XML_CONTENT.key() + "', " + Key.JSON_FILE.key() + "', or '" + Key.JSON_CONTENT.key() + "'");
 					}
 				}
 			}
 		}
+		return result;
 	}
 
 	private boolean readXmlFileAndConvertToJson(File file)
@@ -115,7 +127,7 @@ public class Xml extends Executor
 		    InputStream stream = new ByteArrayInputStream(xml.getBytes("UTF-8"));
 		    saxParser.parse(stream, new DefaultHandler());
 			JSONObject jsonObject = XML.toJSONObject(xml);
-			responseNode.put(Executor.RESULT, jsonObject.toString());
+			getResponseNode().put(Executor.RESULT, jsonObject.toString());
 		}
 		catch (Exception e)
 		{
@@ -130,7 +142,7 @@ public class Xml extends Executor
 		try
 		{
 			JSONObject jsonObject = new JSONObject(json);
-		    responseNode.put(Executor.RESULT, XML.toString(jsonObject));
+		    getResponseNode().put(Executor.RESULT, XML.toString(jsonObject));
 		}
 		catch (Exception e)
 		{
@@ -160,18 +172,4 @@ public class Xml extends Executor
 			return this.key;
 		}
 	}
-
-//	public void convertWordToPdf(Object[] parameters)
-//	{
-//		InputStream source = new File(String.valueOf(parameters[0])); 
-//		OutputStream target = new File(String.valueOf(parameters[1]));
-//		IConverter converter = LocalConverter.builder().build();
-//		if (converter
-//				.convert(source).as(DocumentType.MS_WORD)
-//		        .to(target).as(DocumentType.PDF)
-//		        .execute())
-//		{
-//			
-//		}
-//	}
 }

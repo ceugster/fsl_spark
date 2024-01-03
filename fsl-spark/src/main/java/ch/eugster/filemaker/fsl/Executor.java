@@ -2,9 +2,11 @@ package ch.eugster.filemaker.fsl;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.util.Objects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -20,10 +22,12 @@ public abstract class Executor
 	public static final String ERROR = "Fehler";
 
 	public static final String RESULT = "result";
+
+	protected static ObjectMapper mapper = new ObjectMapper();
 	
-	protected ObjectNode requestNode;
+	private ObjectNode requestNode;
 	
-	protected ObjectNode responseNode;
+	private ObjectNode responseNode;
 	
 	public ObjectNode execute(String command, ObjectNode requestNode, ObjectNode responseNode)
 	{
@@ -76,13 +80,61 @@ public abstract class Executor
 		return responseNode;
 	}
 	
-	protected boolean addErrorMessage(String message)
+	protected boolean createRequestNode(String request)
+	{
+		boolean result = true;
+		if (Objects.nonNull(request) && !request.trim().isEmpty())
+		{
+			try 
+			{
+				JsonNode _requestNode = mapper.readTree(request);
+				requestNode = ObjectNode.class.cast(_requestNode);
+				responseNode = mapper.createObjectNode();
+			} 
+			catch (JsonMappingException e) 
+			{
+				result = addErrorMessage("cannot map 'request': illegal json format");
+			} 
+			catch (JsonProcessingException e) 
+			{
+				result = addErrorMessage("cannot process 'request': illegal json format");
+			}
+			catch (ClassCastException e)
+			{
+				result = addErrorMessage("cannot cast 'request': illegal json format");
+			}
+		}
+		else
+		{
+			result = addErrorMessage("missing argument 'request'");
+		}
+		return result;
+	}
+
+	protected ObjectNode getRequestNode()
+	{
+		return requestNode;
+	}
+
+	protected ObjectNode getResponseNode()
 	{
 		if (Objects.isNull(responseNode))
 		{
-			responseNode = new ObjectMapper().createObjectNode();
-			
+			responseNode = mapper.createObjectNode();
 		}
+		return responseNode;
+	}
+	
+	protected String getResponse()
+	{
+		String response = getResponseNode().put(Executor.STATUS, getResponseNode().has(Executor.ERRORS) ? Executor.ERROR : Executor.OK).toString();
+		requestNode = null;
+		responseNode = null;
+		return response;
+	}
+	
+	protected boolean addErrorMessage(String message)
+	{
 		ArrayNode errors = ArrayNode.class.cast(responseNode.get(Executor.ERRORS));
 		if (Objects.isNull(errors))
 		{

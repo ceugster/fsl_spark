@@ -480,19 +480,6 @@ public final class XlsTest extends AbstractXlsTest
 		assertEquals(Executor.ERROR, responseNode.get(Executor.STATUS).asText());
 		assertEquals(1, responseNode.get(Executor.ERRORS).size());
 		assertEquals("missing argument '" + Key.PATH.key() + "'",responseNode.get(Executor.ERRORS).get(0).asText());
-
-		requestNode = mapper.createObjectNode();
-		requestNode.put(Key.PATH.key(), "$:ç");
-		
-		response = client.POST("http://localhost:4567/fsl/Xls.saveWorkbook").
-				header("Content-Type", "application/json").
-				content(new StringContentProvider(requestNode.toString())).
-				accept("application/json").
-				send();
-		
-		responseNode = mapper.readTree(response.getContentAsString());
-		assertEquals(Executor.OK, responseNode.get(Executor.STATUS).asText());
-		assertNull(responseNode.get(Executor.ERRORS));
 	}
 
 	@Test

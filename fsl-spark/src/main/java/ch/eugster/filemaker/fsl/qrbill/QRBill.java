@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ch.eugster.filemaker.fsl.Executor;
 import net.codecrete.qrbill.generator.Address;
@@ -25,75 +24,77 @@ import net.codecrete.qrbill.generator.ValidationResult;
  */
 public class QRBill extends Executor
 {
-//	private ObjectMapper mapper = new ObjectMapper();
-//
 //	private Parameters parameters = loadDefaultParameters();
 
-	public void generate(ObjectNode requestNode, ObjectNode responseNode)
+	public String generate(String request)
 	{
-		try 
+		if (createRequestNode(request))
 		{
-			Bill bill = new Bill();
-			bill.setAccount(checkString(requestNode, Key.IBAN.key()));
-			bill.setReference(checkString(requestNode, Key.REFERENCE.key()));
-			bill.setAmountFromDouble(checkDouble(requestNode, Key.AMOUNT.key()));
-			bill.setCurrency(checkString(requestNode, Key.CURRENCY.key()));
-			bill.setUnstructuredMessage(checkString(requestNode, Key.MESSAGE.key()));
-
-			JsonNode creditor = requestNode.get(Key.CREDITOR.key());
-			if (JsonNode.class.isInstance(creditor))
+			try 
 			{
-				Address address = new Address();
-				address.setName(checkString(creditor, Key.NAME.key()));
-				address.setAddressLine1(checkString(creditor, Key.ADDRESS_LINE_1.key()));
-				address.setAddressLine2(checkString(creditor, Key.ADDRESS_LINE_2.key()));
-				address.setCountryCode(checkString(creditor, Key.COUNTRY.key()));
-				bill.setCreditor(address);
-			}
-
-			JsonNode debtor = requestNode.get(Key.DEBTOR.key());
-			if (JsonNode.class.isInstance(debtor))
-			{
-				Address address = new Address();
-				address.setName(checkString(debtor, Key.NAME.key()));
-				address.setAddressLine1(checkString(debtor, Key.ADDRESS_LINE_1.key()));
-				address.setAddressLine2(checkString(debtor, Key.ADDRESS_LINE_2.key()));
-				address.setCountryCode(checkString(debtor, Key.COUNTRY.key()));
-				bill.setDebtor(address);
-			}
-
-			JsonNode form = requestNode.get(Key.FORMAT.key());
-			if (JsonNode.class.isInstance(form))
-			{
-				BillFormat format = new BillFormat();
-				format.setGraphicsFormat(checkGraphicsFormat(form));
-				format.setLanguage(checkLanguage(form));
-				format.setOutputSize(checkOutputSize(form));
-				bill.setFormat(format);
-			}
-
-			ValidationResult validation = net.codecrete.qrbill.generator.QRBill.validate(bill);
-			if (validation.isValid())
-			{
-				byte[] swissqrbill = net.codecrete.qrbill.generator.QRBill.generate(bill);
-				responseNode.put(Executor.RESULT, swissqrbill);
-			}
-			else
-			{
-				List<ValidationMessage> msgs = validation.getValidationMessages();
-				if (!msgs.isEmpty())
+				Bill bill = new Bill();
+				bill.setAccount(checkString(getRequestNode(), Key.IBAN.key()));
+				bill.setReference(checkString(getRequestNode(), Key.REFERENCE.key()));
+				bill.setAmountFromDouble(checkDouble(getRequestNode(), Key.AMOUNT.key()));
+				bill.setCurrency(checkString(getRequestNode(), Key.CURRENCY.key()));
+				bill.setUnstructuredMessage(checkString(getRequestNode(), Key.MESSAGE.key()));
+	
+				JsonNode creditor = getRequestNode().get(Key.CREDITOR.key());
+				if (JsonNode.class.isInstance(creditor))
 				{
-					for (ValidationMessage msg : msgs)
+					Address address = new Address();
+					address.setName(checkString(creditor, Key.NAME.key()));
+					address.setAddressLine1(checkString(creditor, Key.ADDRESS_LINE_1.key()));
+					address.setAddressLine2(checkString(creditor, Key.ADDRESS_LINE_2.key()));
+					address.setCountryCode(checkString(creditor, Key.COUNTRY.key()));
+					bill.setCreditor(address);
+				}
+	
+				JsonNode debtor = getRequestNode().get(Key.DEBTOR.key());
+				if (JsonNode.class.isInstance(debtor))
+				{
+					Address address = new Address();
+					address.setName(checkString(debtor, Key.NAME.key()));
+					address.setAddressLine1(checkString(debtor, Key.ADDRESS_LINE_1.key()));
+					address.setAddressLine2(checkString(debtor, Key.ADDRESS_LINE_2.key()));
+					address.setCountryCode(checkString(debtor, Key.COUNTRY.key()));
+					bill.setDebtor(address);
+				}
+	
+				JsonNode form = getRequestNode().get(Key.FORMAT.key());
+				if (JsonNode.class.isInstance(form))
+				{
+					BillFormat format = new BillFormat();
+					format.setGraphicsFormat(checkGraphicsFormat(form));
+					format.setLanguage(checkLanguage(form));
+					format.setOutputSize(checkOutputSize(form));
+					bill.setFormat(format);
+				}
+	
+				ValidationResult validation = net.codecrete.qrbill.generator.QRBill.validate(bill);
+				if (validation.isValid())
+				{
+					byte[] swissqrbill = net.codecrete.qrbill.generator.QRBill.generate(bill);
+					getResponseNode().put(Executor.RESULT, swissqrbill);
+				}
+				else
+				{
+					List<ValidationMessage> msgs = validation.getValidationMessages();
+					if (!msgs.isEmpty())
 					{
-						addErrorMessage(msg.getMessageKey() + ": '" + msg.getField() + "'");
+						for (ValidationMessage msg : msgs)
+						{
+							addErrorMessage(msg.getMessageKey() + ": '" + msg.getField() + "'");
+						}
 					}
 				}
+			} 
+			catch (Exception e) 
+			{
+				addErrorMessage("invalid_json_format_parameter '" + e.getLocalizedMessage() + "'");
 			}
-		} 
-		catch (Exception e) 
-		{
-			addErrorMessage("invalid_json_format_parameter '" + e.getLocalizedMessage() + "'");
 		}
+		return getResponse();
 	}
 	
 	private String checkString(JsonNode requestNode, String key)
