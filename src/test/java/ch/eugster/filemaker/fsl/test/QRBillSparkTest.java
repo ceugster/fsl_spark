@@ -102,9 +102,11 @@ public class QRBillSparkTest extends AbstractTest
 		parameters.put(QRBill.Key.REFERENCE.key(), "00000000000000000000000000");
 		ObjectNode creditor = parameters.putObject("creditor");
 		creditor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		creditor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 27");
-		creditor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		creditor.put(QRBill.Key.COUNTRY.key(), "CH");
+		creditor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		creditor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		creditor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		creditor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		creditor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 
 		ContentResponse response = client.POST("http://localhost:4567/fsl/QRBill.generate").
 				header("Content-Type", "application/json").
@@ -127,9 +129,11 @@ public class QRBillSparkTest extends AbstractTest
 		parameters.put(QRBill.Key.REFERENCE.key(), "RF49N73GBST73AKL38ZX");
 		ObjectNode creditor = parameters.putObject("creditor");
 		creditor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		creditor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 7");
-		creditor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		creditor.put(QRBill.Key.COUNTRY.key(), "CH");
+		creditor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		creditor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		creditor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		creditor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		creditor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 
 		ContentResponse response = client.POST("http://localhost:4567/fsl/QRBill.generate").
 				header("Content-Type", "application/json").
@@ -190,9 +194,11 @@ public class QRBillSparkTest extends AbstractTest
 		parameters.put(QRBill.Key.REFERENCE.key(), "00000000000000000000000000");
 		ObjectNode creditor = parameters.putObject("creditor");
 		creditor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		creditor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 27");
-		creditor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		creditor.put(QRBill.Key.COUNTRY.key(), "CH");
+		creditor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		creditor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		creditor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		creditor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		creditor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 
 		ContentResponse response = client.POST("http://localhost:4567/fsl/QRBill.generate").
 				header("Content-Type", "application/json").
@@ -215,9 +221,11 @@ public class QRBillSparkTest extends AbstractTest
 		parameters.put(QRBill.Key.REFERENCE.key(), "00000000000000000000000000");
 		ObjectNode creditor = parameters.putObject("creditor");
 		creditor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		creditor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 27");
-		creditor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		creditor.put(QRBill.Key.COUNTRY.key(), "CH");
+		creditor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		creditor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		creditor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		creditor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		creditor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 
 		ContentResponse response = client.POST("http://localhost:4567/fsl/QRBill.generate").
 				header("Content-Type", "application/json").
@@ -240,9 +248,11 @@ public class QRBillSparkTest extends AbstractTest
 		parameters.put(QRBill.Key.REFERENCE.key(), "00000000000000000000000000");
 		ObjectNode creditor = parameters.putObject("creditor");
 		creditor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		creditor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 27");
-		creditor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		creditor.put(QRBill.Key.COUNTRY.key(), "CH");
+		creditor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		creditor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		creditor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		creditor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		creditor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 
 		ContentResponse response = client.POST("http://localhost:4567/fsl/QRBill.generate").
 				header("Content-Type", "application/json").
@@ -265,9 +275,11 @@ public class QRBillSparkTest extends AbstractTest
 		parameters.put(QRBill.Key.REFERENCE.key(), "FS000000000000000000000000");
 		ObjectNode creditor = parameters.putObject("creditor");
 		creditor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		creditor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 27");
-		creditor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		creditor.put(QRBill.Key.COUNTRY.key(), "CH");
+		creditor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		creditor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		creditor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		creditor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		creditor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 
 		ContentResponse response = client.POST("http://localhost:4567/fsl/QRBill.generate").
 				header("Content-Type", "application/json").
@@ -294,14 +306,18 @@ public class QRBillSparkTest extends AbstractTest
 		parameters.put("message", "Abonnement für 2020");
 		ObjectNode creditor = parameters.putObject("creditor");
 		creditor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		creditor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 27");
-		creditor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		creditor.put(QRBill.Key.COUNTRY.key(), "CH");
+		creditor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		creditor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		creditor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		creditor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		creditor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 		ObjectNode debtor = parameters.putObject("debtor");
 		debtor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		debtor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 27");
-		debtor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		debtor.put(QRBill.Key.COUNTRY.key(), "CH");
+		debtor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		debtor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		debtor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		debtor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		debtor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 		ObjectNode form = parameters.putObject("format");
 		form.put(QRBill.Key.GRAPHICS_FORMAT.key(), GraphicsFormat.PDF.name());
 		form.put(QRBill.Key.OUTPUT_SIZE.key(), OutputSize.A4_PORTRAIT_SHEET.name());
@@ -328,9 +344,11 @@ public class QRBillSparkTest extends AbstractTest
 		parameters.put(QRBill.Key.REFERENCE.key(), "00000000000000000000000000");
 		ObjectNode creditor = parameters.putObject("creditor");
 		creditor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		creditor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 27");
-		creditor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		creditor.put(QRBill.Key.COUNTRY.key(), "CH");
+		creditor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		creditor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		creditor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		creditor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		creditor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 		ObjectNode form = parameters.putObject("format");
 		form.put(QRBill.Key.GRAPHICS_FORMAT.key(), "blabla");
 		form.put(QRBill.Key.LANGUAGE.key(), Language.IT.toString());
@@ -359,9 +377,11 @@ public class QRBillSparkTest extends AbstractTest
 		parameters.put(QRBill.Key.REFERENCE.key(), "00000000000000000000000000");
 		ObjectNode creditor = parameters.putObject("creditor");
 		creditor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		creditor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 27");
-		creditor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		creditor.put(QRBill.Key.COUNTRY.key(), "CH");
+		creditor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		creditor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		creditor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		creditor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		creditor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 		ObjectNode form = parameters.putObject("format");
 		form.put(QRBill.Key.GRAPHICS_FORMAT.key(), GraphicsFormat.PDF.toString());
 		form.put(QRBill.Key.LANGUAGE.key(), "blabla");
@@ -389,9 +409,11 @@ public class QRBillSparkTest extends AbstractTest
 		parameters.put(QRBill.Key.REFERENCE.key(), "00000000000000000000000000");
 		ObjectNode creditor = parameters.putObject("creditor");
 		creditor.put(QRBill.Key.NAME.key(), "Christian Eugster");
-		creditor.put(QRBill.Key.ADDRESS_LINE_1.key(), "Axensteinstrasse 27");
-		creditor.put(QRBill.Key.ADDRESS_LINE_2.key(), "9000 St. Gallen");
-		creditor.put(QRBill.Key.COUNTRY.key(), "CH");
+		creditor.put(QRBill.Key.STREET.key(), "Axensteinstrasse");
+		creditor.put(QRBill.Key.HOUSE_NO.key(), "27");
+		creditor.put(QRBill.Key.POSTAL_CODE.key(), "9000");
+		creditor.put(QRBill.Key.TOWN.key(), "St. Gallen");
+		creditor.put(QRBill.Key.COUNTRY_CODE.key(), "CH");
 		ObjectNode form = parameters.putObject("format");
 		form.put(QRBill.Key.GRAPHICS_FORMAT.key(), GraphicsFormat.PDF.toString());
 		form.put(QRBill.Key.LANGUAGE.key(), Language.IT.toString());

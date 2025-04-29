@@ -1413,3 +1413,42 @@ get whether the text should be wrapped
 JSONSetElement ( $request ; "wrap_text" ; 1 ; JSONNumber )
 ```
 
+## Camt 
+
+### Commands
+
+#### convertCamt
+
+Converts a valid CAMT XML file or valid CAMT XML file content to json and vice versa
+
+##### Example
+
+```
+set variable [ $path ; Get ( Dokumentpath ) & "Camt.xml" ]
+JSONSetElement ( $request ; "camt_file" ; $path ; JSONString )
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Camt.convertCamt" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
+```
+
+or if a camt file content is provided:
+
+```
+set variable [ $content ; "<?xml version="1.0" encoding="UTF-8" ?><Doc:Document xmlns:Doc="urn:iso:std:iso:20022:tech:xsd:camt.054.001.04"><Doc:BkToCstmrDbtCdtNtfctn><Doc:GrpHdr><Doc:MsgId>20221216375204007304861</Doc:MsgId><Doc:CreDtTm>2022-12-16T23:39:55+01:00</Doc:CreDtTm><Doc:MsgPgntn><Doc:PgNb>1</Doc:PgNb><Doc:LastPgInd>true</Doc:LastPgInd></Doc:MsgPgntn><Doc:AddtlInf>SPS/1.7/PROD</Doc:AddtlInf></Doc:GrpHdr><Doc:Ntfctn><Doc:Id>0000000000000000000000</Doc:Id><Doc:CreDtTm>2022-12-16T23:59:59+01:00</Doc:CreDtTm><Doc:FrToDt><Doc:FrDtTm>2022-12-10T00:00:00+01:00</Doc:FrDtTm><Doc:ToDtTm>2022-12-16T23:59:59+01:00</Doc:ToDtTm></Doc:FrToDt><Doc:RptgSrc><Doc:Prtry>OTHR</Doc:Prtry></Doc:RptgSrc><Doc:Acct><Doc:Id><Doc:IBAN>CH0000000000000000000</Doc:IBAN></Doc:Id><Doc:Ownr><Doc:Nm>Pfluger Christoph August Der Zeitpunkt Zürich</Doc:Nm></Doc:Ownr></Doc:Acct><Doc:Ntry><Doc:NtryRef>CH0000000000000000000</Doc:NtryRef><Doc:Amt Ccy="CHF">50.00</Doc:Amt><Doc:CdtDbtInd>CRDT</Doc:CdtDbtInd><Doc:RvslInd>false</Doc:RvslInd><Doc:Sts>BOOK</Doc:Sts><Doc:BookgDt><Doc:Dt>2022-12-16</Doc:Dt></Doc:BookgDt><Doc:ValDt><Doc:Dt>2022-12-16</Doc:Dt></Doc:ValDt><Doc:AcctSvcrRef>000000000A0A0000</Doc:AcctSvcrRef><Doc:BkTxCd><Doc:Domn><Doc:Cd>PMNT</Doc:Cd><Doc:Fmly><Doc:Cd>RCDT</Doc:Cd><Doc:SubFmlyCd>VCOM</Doc:SubFmlyCd></Doc:Fmly></Doc:Domn></Doc:BkTxCd><Doc:NtryDtls><Doc:Btch><Doc:NbOfTxs>3</Doc:NbOfTxs></Doc:Btch><Doc:TxDtls><Doc:Refs><Doc:AcctSvcrRef>221215CH09LS26M5</Doc:AcctSvcrRef><Doc:InstrId>0000000000000000000000</Doc:InstrId><Doc:Prtry><Doc:Tp>00</Doc:Tp><Doc:Ref>0000000000000000000000</Doc:Ref></Doc:Prtry></Doc:Refs><Doc:Amt Ccy="CHF">20.00</Doc:Amt><Doc:CdtDbtInd>CRDT</Doc:CdtDbtInd><Doc:BkTxCd><Doc:Domn><Doc:Cd>PMNT</Doc:Cd><Doc:Fmly><Doc:Cd>RCDT</Doc:Cd><Doc:SubFmlyCd>AUTT</Doc:SubFmlyCd></Doc:Fmly></Doc:Domn></Doc:BkTxCd><Doc:RltdPties><Doc:Dbtr><Doc:Nm>Nachname, Vorname</Doc:Nm><Doc:PstlAdr><Doc:StrtNm>Strasse Nr.</Doc:StrtNm><Doc:BldgNb>19</Doc:BldgNb><Doc:PstCd>8000</Doc:PstCd><Doc:TwnNm>Zürich</Doc:TwnNm><Doc:Ctry>CH</Doc:Ctry></Doc:PstlAdr></Doc:Dbtr><Doc:DbtrAcct><Doc:Id><Doc:IBAN>CH0000000000000000000</Doc:IBAN></Doc:Id></Doc:DbtrAcct><Doc:UltmtDbtr><Doc:Nm>Nachname, Vorname</Doc:Nm><Doc:PstlAdr><Doc:StrtNm>Florastr. 16</Doc:StrtNm><Doc:PstCd>8000</Doc:PstCd><Doc:TwnNm>Zürich</Doc:TwnNm><Doc:Ctry>CH</Doc:Ctry></Doc:PstlAdr></Doc:UltmtDbtr><Doc:CdtrAcct><Doc:Id><Doc:IBAN>CH0000000000000000000</Doc:IBAN></Doc:Id></Doc:CdtrAcct></Doc:RltdPties><Doc:RltdAgts><Doc:DbtrAgt><Doc:FinInstnId><Doc:BICFI>POFICHBEXXX</Doc:BICFI><Doc:Nm>POSTFINANCE AG</Doc:Nm><Doc:PstlAdr><Doc:AdrLine>MINGERSTRASSE 20</Doc:AdrLine><Doc:AdrLine>3030 BERN</Doc:AdrLine></Doc:PstlAdr></Doc:FinInstnId></Doc:DbtrAgt></Doc:RltdAgts><Doc:RmtInf><Doc:Strd><Doc:CdtrRefInf><Doc:Tp><Doc:CdOrPrtry><Doc:Prtry>QRR</Doc:Prtry></Doc:CdOrPrtry></Doc:Tp><Doc:Ref>00000000000000000000000000</Doc:Ref></Doc:CdtrRefInf><Doc:AddtlRmtInf>?REJECT?0</Doc:AddtlRmtInf><Doc:AddtlRmtInf>?ERROR?000</Doc:AddtlRmtInf><Doc:AddtlRmtInf>Rechnung Nr. 000000</Doc:AddtlRmtInf></Doc:Strd></Doc:RmtInf><Doc:RltdDts><Doc:AccptncDtTm>2022-12-16T00:00:00+01:00</Doc:AccptncDtTm></Doc:RltdDts></Doc:TxDtls><Doc:TxDtls><Doc:Refs><Doc:AcctSvcrRef>000000CH00AAA0AA</Doc:AcctSvcrRef><Doc:InstrId>0000000000000000000000</Doc:InstrId><Doc:Prtry><Doc:Tp>00</Doc:Tp><Doc:Ref>0000000000000000000000</Doc:Ref></Doc:Prtry></Doc:Refs><Doc:Amt Ccy="CHF">10.00</Doc:Amt><Doc:CdtDbtInd>CRDT</Doc:CdtDbtInd><Doc:BkTxCd><Doc:Domn><Doc:Cd>PMNT</Doc:Cd><Doc:Fmly><Doc:Cd>RCDT</Doc:Cd><Doc:SubFmlyCd>AUTT</Doc:SubFmlyCd></Doc:Fmly></Doc:Domn></Doc:BkTxCd><Doc:RltdPties><Doc:Dbtr><Doc:Nm>Nachname, Vorname</Doc:Nm><Doc:PstlAdr><Doc:StrtNm>Strasse Nr.</Doc:StrtNm><Doc:BldgNb>19</Doc:BldgNb><Doc:PstCd>8000</Doc:PstCd><Doc:TwnNm>Zürich</Doc:TwnNm><Doc:Ctry>CH</Doc:Ctry></Doc:PstlAdr></Doc:Dbtr><Doc:DbtrAcct><Doc:Id><Doc:IBAN>CH0000000000000000000</Doc:IBAN></Doc:Id></Doc:DbtrAcct><Doc:UltmtDbtr><Doc:Nm>Vorname Name</Doc:Nm><Doc:PstlAdr><Doc:StrtNm>Werkhofstr. 19</Doc:StrtNm><Doc:PstCd>8000</Doc:PstCd><Doc:TwnNm>Zürich</Doc:TwnNm><Doc:Ctry>CH</Doc:Ctry></Doc:PstlAdr></Doc:UltmtDbtr><Doc:CdtrAcct><Doc:Id><Doc:IBAN>CH0000000000000000000</Doc:IBAN></Doc:Id></Doc:CdtrAcct></Doc:RltdPties><Doc:RltdAgts><Doc:DbtrAgt><Doc:FinInstnId><Doc:BICFI>POFICHBEXXX</Doc:BICFI><Doc:Nm>POSTFINANCE AG</Doc:Nm><Doc:PstlAdr><Doc:AdrLine>MINGERSTRASSE 20</Doc:AdrLine><Doc:AdrLine>3030 BERN</Doc:AdrLine></Doc:PstlAdr></Doc:FinInstnId></Doc:DbtrAgt></Doc:RltdAgts><Doc:RmtInf><Doc:Strd><Doc:CdtrRefInf><Doc:Tp><Doc:CdOrPrtry><Doc:Prtry>QRR</Doc:Prtry></Doc:CdOrPrtry></Doc:Tp><Doc:Ref>00000000000000000000000000</Doc:Ref></Doc:CdtrRefInf><Doc:AddtlRmtInf>?REJECT?0</Doc:AddtlRmtInf><Doc:AddtlRmtInf>?ERROR?000</Doc:AddtlRmtInf><Doc:AddtlRmtInf>Rechnung Nr. 372144</Doc:AddtlRmtInf></Doc:Strd></Doc:RmtInf><Doc:RltdDts><Doc:AccptncDtTm>2022-12-16T20:00:00+01:00</Doc:AccptncDtTm></Doc:RltdDts></Doc:TxDtls><Doc:TxDtls><Doc:Refs><Doc:AcctSvcrRef>000000CH00AAAA00</Doc:AcctSvcrRef><Doc:InstrId>000000000000000000000</Doc:InstrId><Doc:Prtry><Doc:Tp>00</Doc:Tp><Doc:Ref>0000000000000000000000</Doc:Ref></Doc:Prtry></Doc:Refs><Doc:Amt Ccy="CHF">20.00</Doc:Amt><Doc:CdtDbtInd>CRDT</Doc:CdtDbtInd><Doc:BkTxCd><Doc:Domn><Doc:Cd>PMNT</Doc:Cd><Doc:Fmly><Doc:Cd>RCDT</Doc:Cd><Doc:SubFmlyCd>AUTT</Doc:SubFmlyCd></Doc:Fmly></Doc:Domn></Doc:BkTxCd><Doc:RltdPties><Doc:Dbtr><Doc:Nm>Nachname, Vorname</Doc:Nm><Doc:PstlAdr><Doc:StrtNm>Strasse Nr.</Doc:StrtNm><Doc:BldgNb>19</Doc:BldgNb><Doc:PstCd>8000</Doc:PstCd><Doc:TwnNm>Zürich</Doc:TwnNm><Doc:Ctry>CH</Doc:Ctry></Doc:PstlAdr></Doc:Dbtr><Doc:DbtrAcct><Doc:Id><Doc:IBAN>CH0000000000000000000</Doc:IBAN></Doc:Id></Doc:DbtrAcct><Doc:UltmtDbtr><Doc:Nm>Nachname, Vorname</Doc:Nm><Doc:PstlAdr><Doc:StrtNm>Strasse Nr.</Doc:StrtNm><Doc:PstCd>8000</Doc:PstCd><Doc:TwnNm>Zürich</Doc:TwnNm><Doc:Ctry>CH</Doc:Ctry></Doc:PstlAdr></Doc:UltmtDbtr><Doc:CdtrAcct><Doc:Id><Doc:IBAN>CH0000000000000000000</Doc:IBAN></Doc:Id></Doc:CdtrAcct></Doc:RltdPties><Doc:RltdAgts><Doc:DbtrAgt><Doc:FinInstnId><Doc:BICFI>POFICHBEXXX</Doc:BICFI><Doc:Nm>POSTFINANCE AG</Doc:Nm><Doc:PstlAdr><Doc:AdrLine>MINGERSTRASSE 20</Doc:AdrLine><Doc:AdrLine>3030 BERN</Doc:AdrLine></Doc:PstlAdr></Doc:FinInstnId></Doc:DbtrAgt></Doc:RltdAgts><Doc:RmtInf><Doc:Strd><Doc:CdtrRefInf><Doc:Tp><Doc:CdOrPrtry><Doc:Prtry>QRR</Doc:Prtry></Doc:CdOrPrtry></Doc:Tp><Doc:Ref>000000372143141220225247907</Doc:Ref></Doc:CdtrRefInf><Doc:AddtlRmtInf>?REJECT?0</Doc:AddtlRmtInf><Doc:AddtlRmtInf>?ERROR?000</Doc:AddtlRmtInf><Doc:AddtlRmtInf>Rechnung Nr. 000000</Doc:AddtlRmtInf></Doc:Strd></Doc:RmtInf><Doc:RltdDts><Doc:AccptncDtTm>2022-12-16T20:00:00+01:00</Doc:AccptncDtTm></Doc:RltdDts></Doc:TxDtls></Doc:NtryDtls><Doc:AddtlNtryInf>SAMMELGUTSCHRIFT F&#220;R KONTO: CH0000000000000000000 VERARBEITUNG VOM 16.12.2022 PAKET ID: 000000CH00000U0</Doc:AddtlNtryInf></Doc:Ntry></Doc:Ntfctn></Doc:BkToCstmrDbtCdtNtfctn></Doc:Document>" ]
+JSONSetElement ( $request ; "camt_content" ; $content & "Camt.xml" ; JSONString )
+Insert From URL [ selection ; with dialog: off ; Target: $response ; "http://localhost:4567/fsl/Camt.convertCamt" ; cURL-Options: " --data @$request --header \"Content-Type: application/json\"" ] 
+```
+
+##### Request parameters 
+
+| name | value(s)
+|---|---|---
+| `camt_file` | valid path to camt file
+| `camt_content` | valid camt file content
+
+##### Response parameters
+
+| name | description
+|---|---
+| `status` | "OK" or "Fehler"
+| `identifier` | CAMT Identifier
+| `result` | content of camt in json format (or in xml format, if original format has been json)
+
